@@ -1,0 +1,47 @@
+input:
+  image: ../images/project_1/p1_1.png
+  # image: test6.jpg
+  # image: papier.jpg
+  # image: papier.jpg
+  # image: papier.jpg
+  model: model_weights/weights/best.pt
+
+paths:
+  general:
+    output_path: output/
+
+  text_detection:
+    output_path: output/text_detection/
+    
+    cache_path: output/text_detection/cache/
+    cache_tiled_path: output/text_detection/cache/tiled/
+    cache_processed_path: output/text_detection/cache/processed/
+    cache_processed_labels_path: output/text_detection/cache/processed/labels/
+    
+    final_path: output/text_detection/final/
+    final_visual_path: output/text_detection/final/visual/
+    final_original_path: output/text_detection/final/original/
+
+  text_recognition:
+    output_path: output/text_recognition/
+    
+    cache_path: output/text_recognition/cache/
+    cache_tiled_path: output/text_recognition/cache/tiled/
+    cache_processed_path: output/text_recognition/cache/processed/
+    cache_processed_labels_path: output/text_recognition/cache/processed/labels/
+    
+    final_path: output/text_recognition/final/
+    final_visual_path: output/text_recognition/final/visual/
+    final_original_path: output/text_recognition/final/original/
+    
+  text_interpretation:
+    output_path: output/text_interpretation/
+    
+    cache_path: output/text_interpretation/cache/
+    cache_tiled_path: output/text_interpretation/cache/tiled/
+    cache_processed_path: output/text_interpretation/cache/processed/
+    cache_processed_labels_path: output/text_interpretation/cache/processed/labels/
+    
+    final_path: output/text_interpretation/final/
+    final_visual_path: output/text_interpretation/final/visual/
+    final_original_path: output/text_interpretation/final/original/
