@@ -3,7 +3,7 @@
 **/output/
 output/
 model_weights/
-app_store/ai/model_weights/
+store/ai/model_weights/
 **/migrations/
 *.pt
 
