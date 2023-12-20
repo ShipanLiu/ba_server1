@@ -22,11 +22,46 @@ from .models import Customer
 from .serilizers import CustomerModalSerializer, PutCustomerModelSerilizer
 
 
+# supports GET-List
+# supports GET-Detail
+class AIsViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
+    pass
+
+# supports GET-List -> /store/projects
+# supports POST-List -> /store/projects
+# supports GET-Detail -> /store/projects/1
+# supports PATCH-Detail -> /store/projects/1
+# supports DELETE-Detail -> /store/projects/1
+class ProjectsViewSet(ModelViewSet):
+    pass
+
+
+# supports GET-List -> /store/images
+# supports POST-List -> /store/images
+# supports GET-Detail -> assocated with project
+# supports DELETE-Detail -> assocated with project
+class ImagesViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
+    pass
+
+
+
+# supports GET-List -> /store/project/project_pk/results
+class ResultsViewSet(ModelViewSet):
+    pass
+
+
+
+
+
+
+
+
+
+
+
+
 # ViewSet for Customer
-class BaseCustomerViewSet(CreateModelMixin, RetrieveModelMixin,
-                          UpdateModelMixin, ListModelMixin,
-                          DestroyModelMixin,
-                          GenericViewSet):
+class BaseCustomerViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin, DestroyModelMixin, GenericViewSet):
     pass
 
 
@@ -69,4 +104,9 @@ class CustomerViewSet(BaseCustomerViewSet):
             # save
             dSlizer.save()
             return Response(dSlizer.data)
+
+
+
+
+
 

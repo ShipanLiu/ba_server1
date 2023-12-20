@@ -60,7 +60,8 @@ class Image(models.Model):
         db_table = "image"
 
 class ResultSet(models.Model):
-    image = models.OneToOneField(Image, on_delete=models.CASCADE, related_name="result_set")
+    image = models.OneToOneField(Image, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='resultSets')
     result_detection = models.JSONField()
     result_recognition = models.JSONField()
     result_interpretation = models.JSONField()
