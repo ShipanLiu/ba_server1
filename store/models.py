@@ -10,8 +10,8 @@ from django.contrib import admin
 class Model(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    create_date = models.DateTimeField(auto_now_add=True)
-    modified_date = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return f"ai-mode id: {self.id}, name: {self.name}"
@@ -32,11 +32,11 @@ class Project(models.Model):
     ]
 
     name = models.CharField(max_length=200)
+    description = models.TextField(max_length=500, blank=True, null=True)
     ai_model = models.ForeignKey(Model, on_delete=models.SET_NULL, null=True, related_name='projects')
-    image_total_nr = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='PENDING')  # Example: pending, processing, completed, failed
-    create_date = models.DateTimeField(auto_now_add=True)
-    modified_date = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
     def __str__(self) -> str:
@@ -50,8 +50,8 @@ class Image(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='images')
     name = models.CharField(max_length=200)
     image_file = models.ImageField(upload_to=project_image_directory_path)
-    create_date = models.DateTimeField(auto_now_add=True)
-    modified_date = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return f"image id: {self.id}, name: {self.name}, belonged project: {self.project}"
@@ -60,12 +60,12 @@ class Image(models.Model):
         db_table = "image"
 
 class ResultSet(models.Model):
-    image = models.OneToOneField(Image, on_delete=models.CASCADE)
+    image = models.OneToOneField(Image, on_delete=models.CASCADE, related_name="result_set")
     result_detection = models.JSONField()
     result_recognition = models.JSONField()
     result_interpretation = models.JSONField()
-    create_date = models.DateTimeField(auto_now_add=True)
-    modified_date = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return f"result_set id: {self.id}"
@@ -81,6 +81,8 @@ class Customer(models.Model):
     phone = models.CharField(max_length=255)
     birth_date = models.DateField(null=True, blank=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     @admin.display(ordering="user__first_name")
     def first_name(self):

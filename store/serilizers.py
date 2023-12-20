@@ -8,3 +8,10 @@ class CustomerModalSerializer(serializers.ModelSerializer):
         fields = ["id", "user_id", "phone", "birth_date"]
 
     user_id = serializers.IntegerField()
+
+class PutCustomerModelSerilizer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = ["id", "user_id", "phone", "birth_date"]
+
+    user_id = serializers.IntegerField(read_only=True)
