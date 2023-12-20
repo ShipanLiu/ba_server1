@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 from . import secrets
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR = /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server
@@ -42,9 +43,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'djoser',
+    'django_filters',
+
+
 
     # self defined apps
-    'app_store'
+    'store',
+    # independent from all apps
+    'core'
 ]
 
 MIDDLEWARE = [
@@ -121,9 +128,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    # },
 ]
 
 
@@ -150,10 +157,32 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Base directory where media files are stored
-MEDIA_ROOT = os.path.join(BASE_DIR, 'app_store', 'images')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'store', 'images')
 
 
 # the decimal format data will still be decinal, won't be string
 REST_FRAMEWORK= {
-    "COERCE_DECIMAL_TO_STRING": False
+    "COERCE_DECIMAL_TO_STRING": False,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+# this is the JWT header(JWT has 3 parts; header, payload, signature)
+
+AUTH_USER_MODEL = "core.User"
+
+
+DJOSER = {
+    "SERIALIZERS": {
+        "user_create": "core.serializers.UserCreateSerializer",
+        "current_user": "core.serializers.UserSerializer"
+    }
+}
+
+
+# change the access-token time to 1 day(https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html)
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('JWT',),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
 }
