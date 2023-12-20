@@ -10,3 +10,37 @@ urlpatterns = [
     # for store app
     path('store/', include('store.urls')),
 ]
+
+
+
+"""
+all endpoints here:
+
+
+# create/update users
+http://127.0.0.1:8001/auth/users/
+
+
+# create/update a customer(assocated to user)
+http://127.0.0.1:8001/store/customers/
+
+
+# [for Frontned]user login(get a response of "acccess-token" back)
+http://127.0.0.1:8001/auth/jwt/create
+
+
+# [for Frontend]: if the access-token is expired, then client has to send 
+    "refresh-token" to server to get a new valide "access-token" for login
+
+
+# after successfully logined in, you want to retrieve the profile(in the header add the JWT header)
+# http://127.0.0.1:8000/auth/users/me/    with header {"Authorization": "JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzAzMTU2MjQwLCJpYXQiOjE3MDMwNjk4NDAsImp0aSI6IjNkMzBiZmI1YTE5ZDRmNWQ4NzhhNGE1Y2UwYzVmMWQxIiwidXNlcl9pZCI6MX0.VyVLGg_jriYRdHw6y3q7c-L-Bh7p_aqUOOnhRgukThY"}
+
+
+
+
+
+
+
+
+"""

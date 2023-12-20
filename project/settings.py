@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 from . import secrets
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR = /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server
@@ -168,15 +169,20 @@ REST_FRAMEWORK= {
 }
 
 # this is the JWT header(JWT has 3 parts; header, payload, signature)
-SIMPLE_JWT = {
-   'AUTH_HEADER_TYPES': ('JWT',),
-}
 
 AUTH_USER_MODEL = "core.User"
 
 
 DJOSER = {
     "SERIALIZERS": {
-        "user_create": "core.serializers.UserCreateSerializer"
+        "user_create": "core.serializers.UserCreateSerializer",
+        "current_user": "core.serializers.UserSerializer"
     }
+}
+
+
+# change the access-token time to 1 day(https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html)
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('JWT',),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
 }
