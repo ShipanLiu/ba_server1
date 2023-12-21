@@ -7,7 +7,7 @@ from django.contrib import admin
 # Create your models here.
 
 # AI Model
-class Model(models.Model):
+class AiModel(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -17,7 +17,7 @@ class Model(models.Model):
         return f"ai-mode id: {self.id}, name: {self.name}"
 
     class Meta:
-        db_table = "model"
+        db_table = "ai-model"
 
 
 
@@ -33,7 +33,7 @@ class Project(models.Model):
 
     name = models.CharField(max_length=200)
     description = models.TextField(max_length=500, blank=True, null=True)
-    ai_model = models.ForeignKey(Model, on_delete=models.SET_NULL, null=True, related_name='projects')
+    ai_model = models.ForeignKey(AiModel, on_delete=models.SET_NULL, null=True, related_name='projects')
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='PENDING')  # Example: pending, processing, completed, failed
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -49,6 +49,7 @@ class Image(models.Model):
     # if project is deleted, then all the images should be deleted
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='images')
     name = models.CharField(max_length=200)
+    type = models.CharField(max_length=20, blank=True, null=True)
     image_file = models.ImageField(upload_to=project_image_directory_path)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -101,3 +102,4 @@ class Customer(models.Model):
 
     class Meta:
         ordering = ['user__first_name', 'user__last_name']
+        db_table = "customer"

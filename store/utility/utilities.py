@@ -6,6 +6,7 @@ def project_image_directory_path(instance, filename):
 
     # Generate a unique filename using UUID
     ext = filename.split('.')[-1]  # Extracts file extension
+
     # project1/p1_uuid.png
-    return os.path.join(project_directory, filename)
+    return os.path.join(project_directory, f"{instance.name}.{ext}")
 

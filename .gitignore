@@ -4,6 +4,7 @@
 output/
 model_weights/
 store/ai/model_weights/
+store/images
 **/migrations/
 *.pt
 
