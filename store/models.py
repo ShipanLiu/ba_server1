@@ -3,7 +3,7 @@ from django.db import models
 from .utility.utilities import project_image_directory_path
 from django.conf import settings
 from django.contrib import admin
-
+import os
 # Create your models here.
 
 # AI Model
@@ -53,6 +53,21 @@ class Image(models.Model):
     image_file = models.ImageField(upload_to=project_image_directory_path)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    """
+    Override the delete() method in Image model: This method will be called whenever an Image object is deleted(whenever an image is deleted, I want also delete them locally)
+    """
+
+    def delete(self, *args, **kwargs):
+        # If there's an associated image file, delete it from the filesystem
+        if self.image_file:
+            image_path = os.path.join(settings.MEDIA_ROOT, self.image_file.name)
+            if os.path.isfile(image_path):
+                os.remove(image_path)
+
+        # Call the "real" delete() method to delete the object from the database
+        super().delete(*args, **kwargs)
+
 
     def __str__(self) -> str:
         return f"image id: {self.id}, name: {self.name}, belonged project: {self.project}"

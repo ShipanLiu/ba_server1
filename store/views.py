@@ -1,5 +1,5 @@
 #django
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.db.models.aggregates import Count
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -72,64 +72,70 @@ class ProjectsViewSet(ModelViewSet):
         }
 
 
-
-    @action(detail=True, methods=["GET"], url_path='images')
+    # "detail=True" means "/store/projects/1/images-upload" not "/store/projects/images-upload"
+    @action(detail=True, methods=["POST", "GET"], url_path='images', parser_classes=[MultiPartParser, FormParser])
     def images(self, request, pk=None):
 
         project = self.get_object()
 
-        # get queryset
-        target_queryset = Image.objects.filter(project=project)
-        # create slizer based on the Database instance
-        sLizer = ImageModelSerializer(target_queryset, many=True)
-        # change the customer to JSON
-        return Response(sLizer.data)
+        if request.method == "GET":
+            # get queryset
+            target_queryset = Image.objects.filter(project=project)
+            # create slizer based on the Database instance
+            sLizer = ImageModelSerializer(target_queryset, many=True)
+            # change the customer to JSON
+            return Response(sLizer.data)
 
+        elif request.method == "POST":
+            """
+            Uploads images to a specific project.
+            Suppose you have an HTML form with an input like <input type="file" name="images" multiple>.
+            The user selects multiple files to upload.
+            The request body would contain each of these files under the 'images' key.
+            """
 
-    # "detail=True" means "/store/projects/1/images-upload" not "/store/projects/images-upload"
-    @action(detail=True, methods=["POST"], url_path='images-upload', parser_classes=[MultiPartParser, FormParser])
-    def images_upload(self, request, pk=None):
+            # Get the total number of images already uploaded for this project
+            existing_images_count = Image.objects.filter(project_id=project.id).count()
 
+            # "images" should be teh form name in frontend
+            images_data = request.FILES.getlist('images')
+
+            good_images = []  # List to store the created image instances
+            bad_images = []
+            image_index = existing_images_count
+            for image_data in images_data:
+                # get the extension of image_data
+                image_ext = image_data.name.split(".")[-1].lower()
+                # we only support 'png' and 'jpg' file
+                if image_ext not in ['png', 'jpg']:
+                    bad_images.append(image_data.name)
+                    continue
+                image_index += 1
+                # Construct the image name using project ID and loop index, for example p1_1.png,  p1_2.png ...
+                image_name = f"p{project.id}_{image_index}"
+                image = Image.objects.create(project_id=project.id, name=image_name, image_file=image_data, type=image_ext)
+                good_images.append(image)
+
+            if good_images:
+                # Serialize the list of created image instances
+                serializer = ImageModelSerializer(good_images, many=True)
+                if bad_images:
+                    return Response({"success_data": serializer.data, "error": True, "error_msg": "part of the images are uploaded but some images does not have extensions 'png' or 'jpg',please upload PART again", "bad_images": bad_images}, status=status.HTTP_202_ACCEPTED)
+                return Response({"success_data": serializer.data, "error": False, "error_msg": "", "bad_images": bad_images}, status=status.HTTP_201_CREATED)
+            return Response({"success_data": "", "error": True, "error_msg": "no images have extensions 'png' or 'jpg', please upload ALL again", "bad_images": bad_images}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['GET', 'DELETE'], url_path='images/(?P<image_id>\d+)')
+    def image_detail(self, request, pk=None, image_id=None):
         project = self.get_object()
+        image = image = get_object_or_404(Image, pk=image_id, project_id=project.id)
 
-        """
-        Uploads images to a specific project.
-        Suppose you have an HTML form with an input like <input type="file" name="images" multiple>.
-        The user selects multiple files to upload.
-        The request body would contain each of these files under the 'images' key.
-        """
+        if request.method == 'GET':
+            serializer = ImageModelSerializer(image)
+            return Response(serializer.data)
 
-        # "images" should be teh form name in frontend
-        images_data = request.FILES.getlist('images')
-        print(images_data)
-        images = []  # List to store the created image instances
-        for index, image_data in enumerate(images_data, start=1):
-            # Construct the image name using project ID and loop index, for example p1_1.png,  p1_2.png ...
-            image_name = f"p{project.id}_{index}"
-            image_type = image_data.name.split(".")[-1]
-            print(image_name)
-            image = Image.objects.create(project_id=project.id, name=image_name, image_file=image_data, type=image_type)
-            images.append(image)
-
-        # Serialize the list of created image instances
-        serializer = ImageModelSerializer(images, many=True)
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    # @action(detail=True, methods=['post'], url_path='upload-images', parser_classes=[MultiPartParser, FormParser])
-    # def upload_images(self, request, pk=None):
-    #     project = self.get_object()
-    #     images_data = request.FILES.getlist('images')
-    #
-    #     images = []  # List to store the created image instances
-    #     for index, image_data in enumerate(images_data, start=1):
-    #         image_name = f"p{project.id}_{index}.{image_data.name.split('.')[-1]}"
-    #         image = Image.objects.create(project=project, name=image_name, image_file=image_data)
-    #         images.append(image)
-    #
-    #     # Serialize the list of created image instances
-    #     serializer = ImageModelSerializer(images, many=True)
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+        elif request.method == 'DELETE':
+            image.delete()
+            return Response({"message": f"image with id {image_id} is deleted"}, status=status.HTTP_204_NO_CONTENT)
 
 
 # supports GET-List -> /store/images

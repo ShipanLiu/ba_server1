@@ -19,6 +19,13 @@ class ImageModelSerializer(serializers.ModelSerializer):
 
 
 
+class SimpleImageModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = ["id", "name", "type", "created_at", "updated_at"]
+
+
+
 
 class ProjectsModelSerilizer(serializers.ModelSerializer):
     class Meta:
@@ -26,7 +33,7 @@ class ProjectsModelSerilizer(serializers.ModelSerializer):
         fields = ["id", "name", "description", "ai_model_id", "status", "images_nr", "images", "created_at", "updated_at"]
 
     ai_model_id = serializers.IntegerField()
-    images = ImageModelSerializer(many=True, read_only=True)
+    images = SimpleImageModelSerializer(many=True, read_only=True)
     images_nr = serializers.IntegerField(read_only=True)
 
 

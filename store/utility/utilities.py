@@ -9,4 +9,3 @@ def project_image_directory_path(instance, filename):
 
     # project1/p1_uuid.png
     return os.path.join(project_directory, f"{instance.name}.{ext}")
-
