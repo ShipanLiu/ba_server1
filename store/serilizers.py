@@ -13,16 +13,30 @@ class AisModelSerilizer(serializers.ModelSerializer):
 class ImageModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
-        fields = ["id", "name", "project_id", "image_file", "type", "created_at", "updated_at"]
+        fields = ["id", "project_id", "name", "old_name", "type", "image_url", "created_at", "updated_at"]
 
     project_id = serializers.IntegerField()
+    image_url = serializers.SerializerMethodField()
+    # image_local_path = serializers.SerializerMethodField()
+
+    def get_image_url(self, obj):
+        return obj.image_url()
+
+    # def get_image_local_path(self, obj):
+    #     return obj.image_local_path()
 
 
 
-class SimpleImageModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Image
-        fields = ["id", "name", "type", "created_at", "updated_at"]
+# class SimpleImageModelSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Image
+#         fields = ["id", "project_id", "name", "old_name", "type", "image_url", "image_file", "created_at", "updated_at"]
+#
+#     project_id = serializers.IntegerField()
+#     image_url = serializers.SerializerMethodField()
+#
+#     def get_image_url(self, obj):
+#         return obj.image_url()
 
 
 
@@ -30,20 +44,27 @@ class SimpleImageModelSerializer(serializers.ModelSerializer):
 class ProjectsModelSerilizer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ["id", "name", "description", "ai_model_id", "status", "images_nr", "images", "created_at", "updated_at"]
+        fields = ["id", "name", "description", "ai_model_id", "customer_id", "customer_username", "status", "images_nr", "images", "created_at", "updated_at"]
 
     ai_model_id = serializers.IntegerField()
-    images = SimpleImageModelSerializer(many=True, read_only=True)
+    customer_id = serializers.IntegerField()
+    customer_username = serializers.SerializerMethodField(read_only=True)
+    images = ImageModelSerializer(many=True, read_only=True)
     images_nr = serializers.IntegerField(read_only=True)
+
+    def get_customer_username(self, project:Project):
+        return project.customer.user.username
+
 
 
 # for creating a project
 class CreateProjectsModelSerilizer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ["id", "name", "description", "ai_model_id"]
+        fields = ["id", "name", "description", "ai_model_id", "customer_id"]
 
     ai_model_id = serializers.IntegerField()
+    customer_id = serializers.IntegerField()
 
 
 # for deleting a project

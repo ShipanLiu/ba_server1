@@ -158,7 +158,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Base directory where media files are stored
 MEDIA_ROOT = os.path.join(BASE_DIR, 'store', 'images')
-
+# for url accessing the local media
+MEDIA_URL = '/media/'
+# define Localhost:port
+LOCALHOST_PORT_URL = 'http://127.0.0.1:8001'
 
 # the decimal format data will still be decinal, won't be string
 REST_FRAMEWORK= {
@@ -184,5 +187,5 @@ DJOSER = {
 # change the access-token time to 1 day(https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html)
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=300),
 }

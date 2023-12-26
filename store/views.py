@@ -27,6 +27,58 @@ from .serilizers import (CustomerModelSerializer, PutCustomerModelSerilizer,
 from .permissions import IsAdminOrReadOnly
 
 
+
+# ViewSet for Customer
+class BaseCustomerViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin, DestroyModelMixin, GenericViewSet):
+    pass
+
+
+# ViewSet for Customer
+# support : create / retrieve / update a customer
+# no support; get customer list
+class CustomerViewSet(BaseCustomerViewSet):
+    # queryset
+    def get_queryset(self):
+        return Customer.objects.all()
+    # serilizer
+    serializer_class = CustomerModelSerializer
+
+    #define permissions: as a admin, I can modify and check all the Customers
+    permission_classes = [IsAdminUser]
+
+    # pas ocntext
+    def get_serializer_context(self):
+        return {
+            "request": self.request
+        }
+    # create action "me", to access the "me" for getting the current customer use url "http://127.0.0.1:8000/store/customers/me/"
+    @action(detail=False, methods=["GET", "PUT"], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        # if user does not even exist, then the request.user = AnonymousUser
+        if not request.user.id:
+            return Response("you need to login first, and send me request with your access-token", status=status.HTTP_401_UNAUTHORIZED)
+        # get the target_cutomer, if not exist, then create(the customer should exist normally)
+        (customer, created) = Customer.objects.get_or_create(user_id=request.user.id)
+        if request.method == "GET":
+            # create sLizer
+            sLizer = CustomerModelSerializer(customer)
+            # return Slizer.data
+            return Response(sLizer.data)
+        elif request.method == "PUT":
+            # create dSlizer based on the customer
+            dSlizer = PutCustomerModelSerilizer(customer, data=request.data)
+            # validate data
+            dSlizer.is_valid(raise_exception=True)
+            # save
+            dSlizer.save()
+            return Response(dSlizer.data)
+
+
+
+
+
+
+
 # supports GET-List
 # supports POST-List(set permissions: IsAdminOrReadOnly, only stuffed admin can add ai-models, others can only view)
 # supports GET-Detail
@@ -52,9 +104,18 @@ class AIsViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, GenericVi
 # grand all permissions for al while developing
 class ProjectsViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
-    # queryset
+    # the basic permission is to be authenticated(angemeldet),
+    permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
-        return Project.objects.annotate(images_nr=Count("images")).prefetch_related("images").all()
+        user = self.request.user
+        # if you are admin/stuffed(inside workers), you are free to check all the
+        if user.is_staff:
+            return Project.objects.annotate(images_nr=Count("images")).select_related("customer").prefetch_related("images").all()
+        # Use get_object_or_404 to get the customer ID or return a 404 response if not found
+        # BAD! this violates "command or query principle"
+        (c_id, created) = Customer.objects.only("id").get_or_create(user_id=user.id)
+        return Project.objects.annotate(images_nr=Count("images")).select_related("customer").prefetch_related("images").filter(customer_id=c_id)
     # serilizer classs
     def get_serializer_class(self):
         if self.action == "create":
@@ -106,6 +167,7 @@ class ProjectsViewSet(ModelViewSet):
             for image_data in images_data:
                 # get the extension of image_data
                 image_ext = image_data.name.split(".")[-1].lower()
+                image_old_name = image_data.name.split(".")[0]
                 # we only support 'png' and 'jpg' file
                 if image_ext not in ['png', 'jpg']:
                     bad_images.append(image_data.name)
@@ -113,7 +175,7 @@ class ProjectsViewSet(ModelViewSet):
                 image_index += 1
                 # Construct the image name using project ID and loop index, for example p1_1.png,  p1_2.png ...
                 image_name = f"p{project.id}_{image_index}"
-                image = Image.objects.create(project_id=project.id, name=image_name, image_file=image_data, type=image_ext)
+                image = Image.objects.create(project_id=project.id, name=image_name, old_name=image_old_name, image_file=image_data, type=image_ext)
                 good_images.append(image)
 
             if good_images:
@@ -127,7 +189,7 @@ class ProjectsViewSet(ModelViewSet):
     @action(detail=True, methods=['GET', 'DELETE'], url_path='images/(?P<image_id>\d+)')
     def image_detail(self, request, pk=None, image_id=None):
         project = self.get_object()
-        image = image = get_object_or_404(Image, pk=image_id, project_id=project.id)
+        image = get_object_or_404(Image, pk=image_id, project_id=project.id)
 
         if request.method == 'GET':
             serializer = ImageModelSerializer(image)
@@ -163,51 +225,6 @@ class ResultsViewSet(ModelViewSet):
 
 
 
-
-# ViewSet for Customer
-class BaseCustomerViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin, DestroyModelMixin, GenericViewSet):
-    pass
-
-
-# ViewSet for Customer
-# support : create / retrieve / update a customer
-# no support; get customer list
-class CustomerViewSet(BaseCustomerViewSet):
-    # queryset
-    def get_queryset(self):
-        return Customer.objects.all()
-    # serilizer
-    serializer_class = CustomerModelSerializer
-
-    #define permissions: as a admin, I can modify and check all the Customers
-    permission_classes = [IsAdminUser]
-
-    # pas ocntext
-    def get_serializer_context(self):
-        return {
-            "request": self.request
-        }
-    # create action "me", to access the "me" for getting the current customer use url "http://127.0.0.1:8000/store/customers/me/"
-    @action(detail=False, methods=["GET", "PUT"], permission_classes=[IsAuthenticated])
-    def me(self, request):
-        # if user does not even exist, then the request.user = AnonymousUser
-        if not request.user.id:
-            return Response("you need to login first, and send me request with your access-token", status=status.HTTP_401_UNAUTHORIZED)
-        # get the target_cutomer, if not exist, then create(the customer should exist normally)
-        (customer, created) = Customer.objects.get_or_create(user_id=request.user.id)
-        if request.method == "GET":
-            # create sLizer
-            sLizer = CustomerModelSerializer(customer)
-            # return Slizer.data
-            return Response(sLizer.data)
-        elif request.method == "PUT":
-            # create dSlizer based on the customer
-            dSlizer = PutCustomerModelSerilizer(customer, data=request.data)
-            # validate data
-            dSlizer.is_valid(raise_exception=True)
-            # save
-            dSlizer.save()
-            return Response(dSlizer.data)
 
 
 
