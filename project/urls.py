@@ -11,7 +11,11 @@ urlpatterns = [
 
     # for store app
     path('store/', include('store.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+
+# only for developing process
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 """

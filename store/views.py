@@ -25,7 +25,7 @@ from .serilizers import (CustomerModelSerializer, PutCustomerModelSerilizer,
                          CreateProjectsModelSerilizer, UpdateProjectsModelSerilizer,
                          ImageModelSerializer)
 from .permissions import IsAdminOrReadOnly
-
+from uuid import uuid4
 
 
 # ViewSet for Customer
@@ -164,7 +164,7 @@ class ProjectsViewSet(ModelViewSet):
 
             good_images = []  # List to store the created image instances
             bad_images = []
-            image_index = existing_images_count
+            # image_index = existing_images_count
             for image_data in images_data:
                 # get the extension of image_data
                 image_ext = image_data.name.split(".")[-1].lower()
@@ -173,9 +173,9 @@ class ProjectsViewSet(ModelViewSet):
                 if image_ext not in ['png', 'jpg']:
                     bad_images.append(image_data.name)
                     continue
-                image_index += 1
+                # image_index += 1
                 # Construct the image name using project ID and loop index, for example p1_1.png,  p1_2.png ...
-                image_name = f"p{project.id}_{image_index}"
+                image_name = uuid4()
                 image = Image.objects.create(project_id=project.id, name=image_name, old_name=image_old_name, image_file=image_data, type=image_ext)
                 good_images.append(image)
 

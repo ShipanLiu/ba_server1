@@ -4,6 +4,9 @@ from .utility.utilities import project_image_directory_path
 from django.conf import settings
 from django.contrib import admin
 import os
+
+
+
 # Create your models here.
 # here define the profile
 class Customer(models.Model):
@@ -92,6 +95,9 @@ class Image(models.Model):
     def delete(self, *args, **kwargs):
         # If there's an associated image file, delete it from the filesystem
         if self.image_file:
+            """
+            Das Attribut name eines ImageField (oder FileField) in Django gibt den Dateipfad des gespeicherten Bildes oder der Datei relativ zum MEDIA_ROOT-Verzeichnis zurück
+            """
             image_path = os.path.join(settings.MEDIA_ROOT, self.image_file.name)
             if os.path.isfile(image_path):
                 os.remove(image_path)

@@ -5,6 +5,7 @@ output/
 model_weights/
 store/ai/model_weights/
 store/images
+media/
 **/migrations/
 *.pt
 
