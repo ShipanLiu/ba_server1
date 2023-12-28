@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Customer, AiModel, Project, Image, ResultSet
+from django.db import transaction
 
 
 # SLizer for AI

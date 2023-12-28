@@ -55,10 +55,11 @@ class CustomerViewSet(BaseCustomerViewSet):
     @action(detail=False, methods=["GET", "PUT"], permission_classes=[IsAuthenticated])
     def me(self, request):
         # if user does not even exist, then the request.user = AnonymousUser
+        # if you have added the "permission_classes=[IsAuthenticated]", then here is checking "request.user.id" is no needed
         if not request.user.id:
             return Response("you need to login first, and send me request with your access-token", status=status.HTTP_401_UNAUTHORIZED)
         # get the target_cutomer, if not exist, then create(the customer should exist normally)
-        (customer, created) = Customer.objects.get_or_create(user_id=request.user.id)
+        customer = Customer.objects.get(user_id=request.user.id)
         if request.method == "GET":
             # create sLizer
             sLizer = CustomerModelSerializer(customer)
@@ -114,7 +115,7 @@ class ProjectsViewSet(ModelViewSet):
             return Project.objects.annotate(images_nr=Count("images")).select_related("customer").prefetch_related("images").all()
         # Use get_object_or_404 to get the customer ID or return a 404 response if not found
         # BAD! this violates "command or query principle"
-        (c_id, created) = Customer.objects.only("id").get_or_create(user_id=user.id)
+        c_id = Customer.objects.only("id").get(user_id=user.id)
         return Project.objects.annotate(images_nr=Count("images")).select_related("customer").prefetch_related("images").filter(customer_id=c_id)
     # serilizer classs
     def get_serializer_class(self):
