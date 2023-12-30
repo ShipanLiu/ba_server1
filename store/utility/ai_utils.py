@@ -101,29 +101,34 @@ def prepare_cfg(project_id, image_name, ai_model_id):
 
 
 def run_ai_model(cfg_path):
-    # Load the configuration
-    with open(cfg_path, 'r') as cfg_file:
-        cfg = yaml.safe_load(cfg_file)
+    try:
+        # Load the configuration
+        with open(cfg_path, 'r') as cfg_file:
+            cfg = yaml.safe_load(cfg_file)
 
-    # Setup directories, clean up, etc.
-    cleaner = Cleaner(cfg)
-    cleaner.setup_dirs()
-    cleaner.clean_dirs()
+        # Setup directories, clean up, etc.
+        cleaner = Cleaner(cfg)
+        cleaner.setup_dirs()
+        cleaner.clean_dirs()
 
-    # Load input image and run localizer
-    localizer = Localizer(cfg)
-    localizer.inference([cfg["input"]["image"]])
+        # Load input image and run localizer
+        localizer = Localizer(cfg)
+        localizer.inference([cfg["input"]["image"]])
 
-    # Run recognizer
-    recognizer = Recognizer(cfg)
-    recognizer.inference(cfg["paths"]["text_detection"]["final_path"])
+        # Run recognizer
+        recognizer = Recognizer(cfg)
+        recognizer.inference(cfg["paths"]["text_detection"]["final_path"])
 
-    # Run interpreter
-    interpreter = Interpreter(cfg)
-    interpreter.inference(cfg["paths"]["text_recognition"]["final_path"])
+        # Run interpreter
+        interpreter = Interpreter(cfg)
+        interpreter.inference(cfg["paths"]["text_recognition"]["final_path"])
 
-    # You might want to return some results or status from this function
-    return True
+        # You might want to return some results or status from this function
+        return True
+    except Exception as e:
+        print(f"AI model processing failed: {e}")
+        # Log the error for debugging
+        return False
 
 
 

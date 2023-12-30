@@ -1,6 +1,7 @@
 from uuid import uuid4
 import time
 import sys
+from celery import group
 
 #django
 from django.shortcuts import render, get_object_or_404
@@ -31,6 +32,7 @@ from .serilizers import (CustomerModelSerializer, PatchCustomerModelSerilizer,
                          ImageModelSerializer)
 from .permissions import IsAdminOrReadOnly
 from .utility.ai_utils import prepare_cfg, run_ai_model
+from .tasks import process_image
 
 
 
@@ -210,7 +212,7 @@ class ProjectsViewSet(ModelViewSet):
                     continue
                 # image_index += 1
                 # Construct the image name using project ID and loop index, for example p1_1.png,  p1_2.png ...
-                image_name = uuid4()
+                image_name = f"{uuid4()}.{image_ext}"  # in database, the image name is with extension
                 image = Image.objects.create(project_id=project.id, name=image_name, old_name=image_old_name, image_file=image_data, type=image_ext)
                 good_images.append(image)
 
@@ -238,52 +240,31 @@ class ProjectsViewSet(ModelViewSet):
 
     # this is a trigger endpoints while visiting "http://127.0.0.1:8001/store/projects/1/start"()
     # extract project_id  -->  get image_nr, model_id
-    # in a loop, which loops the projects and in each loop call the prepare_cfg() from ai_utils, which generates a dynamic yaml file
-    # implement a mechnism to check when the processing is done
+    # for a single image, dynamic yaml file is created, and the call the run_ai_model() function
+    # implementation for processing the whole images of a project
     # if the procesing is done, then save the 3 images path and the 3 json files into RestltSet model
     @action(detail=True, methods=["POST"], url_path='start')
     def start(self, request, pk=None):
-        # Retrieve the project instance
         project = self.get_object()
         project_id = project.id
         ai_model_id = project.ai_model.id if project.ai_model else None
 
+        # Create a group of image processing tasks
+        task_group = group(process_image.s(project_id, image.id, ai_model_id) for image in project.images.all())
 
-        # example: "/Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/cfg.yaml"
-        ymal_file_path = prepare_cfg(project_id, "8b82b41a-bf0c-4855-95c8-c0c7be8bb20b.jpg", ai_model_id)
+        # Execute the group of tasks and wait for all results synchronously
+        result_group = task_group.apply()
 
-        src_path = '/Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/store/ai/src'
-        if src_path not in sys.path:
-            sys.path.append(src_path)
+        # Check for errors in results
+        if any(result.failed() for result in result_group.results):
+            return Response({
+                "message": "Error occurred during processing.",
+                "details": [result.info for result in result_group.results if result.failed()]
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # Measure the start time
-        start_time = time.time()
-
-        # Now call the function that encapsulates the AI model processing
-        ai_processing_result = run_ai_model(ymal_file_path)
-
-        # Measure the end time
-        end_time = time.time()
-
-        # Calculate the total duration
-        duration = end_time - start_time
-
-        # ... handle the result and return a response ...
         return Response({
-            "project_id": project_id,
-            "ai_model_id": ai_model_id,
-            "ymal_file_path": ymal_file_path,
-            "ai_processing_result": ai_processing_result,
-            "processing_time_in_seconds": duration
-        }, status=status.HTTP_202_ACCEPTED)
-
-
-
-
-
-
-
-
+            "message": f"All {project.images.count()} images in project {project.id} have been processed successfully."
+        }, status=status.HTTP_200_OK)
 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>ResultSetViewSet>>>>>>>>>>>>>>>>>>

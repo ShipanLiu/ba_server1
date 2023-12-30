@@ -4,6 +4,7 @@ from .utility.utilities import project_image_directory_path
 from django.conf import settings
 from django.contrib import admin
 import os
+import shutil
 
 
 from .validators import simgle_image_size_vsalidator
@@ -74,6 +75,19 @@ class Project(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def delete(self, *args, **kwargs):
+        # If there's an associated image file, delete it from the filesystem
+        project_folder_name = f"project_{self.id}"
+        project_image_path = os.path.join(settings.MEDIA_ROOT, project_folder_name)
+
+        # delete project folder of path project_image_path
+        # Check if the folder exists and delete it
+        if os.path.exists(project_image_path) and os.path.isdir(project_image_path):
+            shutil.rmtree(project_image_path)
+
+        # Call the "real" delete() method to delete the object from the database
+        super().delete(*args, **kwargs)
 
 
     def __str__(self) -> str:

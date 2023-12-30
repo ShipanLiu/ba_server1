@@ -8,7 +8,7 @@ def project_image_directory_path(instance, filename):
     ext = filename.split('.')[-1]  # Extracts file extension
 
     # project1/p1_uuid.png
-    return os.path.join(project_directory, f"{instance.name}.{ext}")
+    return os.path.join(project_directory, f"{instance.name}")
 
 
 # def project_result_image_directory_path(instance, filename):
