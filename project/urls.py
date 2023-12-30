@@ -24,6 +24,10 @@ all endpoints here:
 
 # create/update users
 http://127.0.0.1:8001/auth/users/
+if you are a admin: then you can get the user list
+if you are logged in as admin/staffed(not relevent to frontend):  you can get the user list:
+if you are logged in as a normal user(not relevent to frontend):  you can only get your info
+if you are not logged in: use http://127.0.0.1:8001/auth/users/ to create a user, a customer will be automatically created:
 
 
 # create/update a customer(assocated to user)

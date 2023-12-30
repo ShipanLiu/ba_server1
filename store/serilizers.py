@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Customer, AiModel, Project, Image, ResultSet
 from django.db import transaction
+from core.serializers import UserSerializer, DetailUserSerializer
 
 
 # SLizer for AI
@@ -62,10 +63,17 @@ class ProjectsModelSerilizer(serializers.ModelSerializer):
 class CreateProjectsModelSerilizer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ["id", "name", "description", "ai_model_id", "customer_id"]
+        fields = ["id", "name", "description", "ai_model_id"]
 
     ai_model_id = serializers.IntegerField()
-    customer_id = serializers.IntegerField()
+
+    def create(self, validated_data):
+        # get the customer_id
+        customer_id = self.context.get("customer_id")
+        # create the project
+        project = Project.objects.create(customer_id=customer_id, **validated_data)
+        # to return the full project info, create a sLizer
+        return project
 
 
 # for deleting a project
@@ -82,13 +90,12 @@ class UpdateProjectsModelSerilizer(serializers.ModelSerializer):
 class CustomerModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ["id", "user_id", "phone", "birth_date"]
+        fields = ["id", "phone", "birth_date", "user_id", "user"]
 
-    user_id = serializers.IntegerField()
+    user_id = serializers.IntegerField
+    user = DetailUserSerializer(read_only=True)
 
-class PutCustomerModelSerilizer(serializers.ModelSerializer):
+class PatchCustomerModelSerilizer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ["id", "user_id", "phone", "birth_date"]
-
-    user_id = serializers.IntegerField(read_only=True)
+        fields = ["phone", "birth_date"]

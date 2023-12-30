@@ -6,13 +6,18 @@ from django.contrib import admin
 import os
 
 
+from .validators import simgle_image_size_vsalidator
+
+
 
 # Create your models here.
 # here define the profile
 class Customer(models.Model):
     phone = models.CharField(max_length=255)
     birth_date = models.DateField(null=True, blank=True)
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    # if a user is deleted, then the customer should also be deleted
+    # but if this customer has projects, then this customer can not be deleted.
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="customer")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -84,7 +89,8 @@ class Image(models.Model):
     old_name = models.CharField(max_length=200)
     type = models.CharField(max_length=20, blank=True, null=True)
     # In the Database: The ImageField or FileField stores the path relative to MEDIA_ROOT, like project_2/p2_1.png.
-    image_file = models.ImageField(upload_to=project_image_directory_path)
+    # a single image can not be bigger than 5MB
+    image_file = models.ImageField(upload_to=project_image_directory_path, validators=[simgle_image_size_vsalidator])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

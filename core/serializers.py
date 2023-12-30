@@ -1,5 +1,8 @@
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from djoser.serializers import UserSerializer as BaseUserSerializer
+from django.conf import settings
+
+from rest_framework import serializers
 
 
 # this serilizer is for creating the user when accessing: "http://127.0.0.1:8001/auth/jwt/create"
@@ -14,5 +17,16 @@ class UserCreateSerializer(BaseUserCreateSerializer):
 # after this you need to register in "settings.py"
 class UserSerializer(BaseUserSerializer):
     class Meta(BaseUserSerializer.Meta):
-        fields = ["id", "username", "email", "first_name", "last_name"]
+        fields = ["id", "username", "email", "first_name", "last_name", "customer_id"]
 
+    customer_id = serializers.SerializerMethodField(read_only=True)
+
+    def get_customer_id(self, obj: settings.AUTH_USER_MODEL):
+        # Überprüfen Sie, ob ein zugehöriges Customer-Objekt existiert
+        if hasattr(obj, 'customer'):
+            return obj.customer.id
+        return None
+
+class DetailUserSerializer(BaseUserSerializer):
+    class Meta(BaseUserSerializer.Meta):
+        fields = ["username", "email", "first_name", "last_name"]

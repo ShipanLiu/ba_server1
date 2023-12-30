@@ -20,7 +20,7 @@ from rest_framework.viewsets import GenericViewSet
 
 # inside
 from .models import Customer, AiModel, Project, Image, ResultSet
-from .serilizers import (CustomerModelSerializer, PutCustomerModelSerilizer,
+from .serilizers import (CustomerModelSerializer, PatchCustomerModelSerilizer,
                          AisModelSerilizer, ProjectsModelSerilizer,
                          CreateProjectsModelSerilizer, UpdateProjectsModelSerilizer,
                          ImageModelSerializer)
@@ -52,7 +52,7 @@ class CustomerViewSet(BaseCustomerViewSet):
             "request": self.request
         }
     # create action "me", to access the "me" for getting the current customer use url "http://127.0.0.1:8000/store/customers/me/"
-    @action(detail=False, methods=["GET", "PUT"], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=["GET", "PATCH"], permission_classes=[IsAuthenticated])
     def me(self, request):
         # if user does not even exist, then the request.user = AnonymousUser
         # if you have added the "permission_classes=[IsAuthenticated]", then here is checking "request.user.id" is no needed
@@ -65,9 +65,9 @@ class CustomerViewSet(BaseCustomerViewSet):
             sLizer = CustomerModelSerializer(customer)
             # return Slizer.data
             return Response(sLizer.data)
-        elif request.method == "PUT":
+        elif request.method == "PATCH":
             # create dSlizer based on the customer
-            dSlizer = PutCustomerModelSerilizer(customer, data=request.data)
+            dSlizer = PatchCustomerModelSerilizer(customer, data=request.data)
             # validate data
             dSlizer.is_valid(raise_exception=True)
             # save
@@ -115,8 +115,8 @@ class ProjectsViewSet(ModelViewSet):
             return Project.objects.annotate(images_nr=Count("images")).select_related("customer").prefetch_related("images").all()
         # Use get_object_or_404 to get the customer ID or return a 404 response if not found
         # BAD! this violates "command or query principle"
-        c_id = Customer.objects.only("id").get(user_id=user.id)
-        return Project.objects.annotate(images_nr=Count("images")).select_related("customer").prefetch_related("images").filter(customer_id=c_id)
+        customer = Customer.objects.only("id").get(user_id=user.id)
+        return Project.objects.annotate(images_nr=Count("images")).select_related("customer").prefetch_related("images").filter(customer_id=customer.id)
     # serilizer classs
     def get_serializer_class(self):
         if self.action == "create":
@@ -129,10 +129,39 @@ class ProjectsViewSet(ModelViewSet):
 
     # pass context to slizer
     def get_serializer_context(self):
+        user = self.request.user
+        customer = Customer.objects.get(user_id=user.id)
         return {
-            "request": self.request
+            "request": self.request,
+            "customer_id": customer.id
         }
 
+    # overwrite the create() for responding a full project structure
+    def create(self, request, *args, **kwargs):
+        # Create serializer with incoming data
+        serializer = CreateProjectsModelSerilizer(data=request.data, context=self.get_serializer_context())
+        serializer.is_valid(raise_exception=True)
+        project = serializer.save()
+
+        # Serialize the response with full details
+        response_serializer = ProjectsModelSerilizer(project, context={'request': request})
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    # overwrite the partical_update() and update() for responding a full project structure
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        # Serialize the response with full details
+        response_serializer = ProjectsModelSerilizer(instance)
+        return Response(response_serializer.data)
 
     # "detail=True" means "/store/projects/1/images-upload" not "/store/projects/images-upload"
     @action(detail=True, methods=["POST", "GET"], url_path='images', parser_classes=[MultiPartParser, FormParser])
@@ -183,9 +212,9 @@ class ProjectsViewSet(ModelViewSet):
                 # Serialize the list of created image instances
                 serializer = ImageModelSerializer(good_images, many=True)
                 if bad_images:
-                    return Response({"success_data": serializer.data, "error": True, "error_msg": "part of the images are uploaded but some images does not have extensions 'png' or 'jpg',please upload PART again", "bad_images": bad_images}, status=status.HTTP_202_ACCEPTED)
-                return Response({"success_data": serializer.data, "error": False, "error_msg": "", "bad_images": bad_images}, status=status.HTTP_201_CREATED)
-            return Response({"success_data": "", "error": True, "error_msg": "no images have extensions 'png' or 'jpg', please upload ALL again", "bad_images": bad_images}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"data": serializer.data, "error": True, "error_msg": "part of the images are uploaded but some images does not have extensions 'png' or 'jpg',please upload PART again", "bad_images": bad_images}, status=status.HTTP_202_ACCEPTED)
+                return Response({"data": serializer.data, "error": False, "error_msg": "", "bad_images": bad_images}, status=status.HTTP_201_CREATED)
+            return Response({"data": "", "error": True, "error_msg": "no images have extensions 'png' or 'jpg', please upload ALL again", "bad_images": bad_images}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['GET', 'DELETE'], url_path='images/(?P<image_id>\d+)')
     def image_detail(self, request, pk=None, image_id=None):
