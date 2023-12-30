@@ -1,7 +1,12 @@
+from uuid import uuid4
+import time
+import sys
+
 #django
 from django.shortcuts import render, get_object_or_404
 from django.db.models.aggregates import Count
 from django_filters.rest_framework import DjangoFilterBackend
+
 
 # rest_framework
 from rest_framework.response import Response
@@ -25,7 +30,8 @@ from .serilizers import (CustomerModelSerializer, PatchCustomerModelSerilizer,
                          CreateProjectsModelSerilizer, UpdateProjectsModelSerilizer,
                          ImageModelSerializer)
 from .permissions import IsAdminOrReadOnly
-from uuid import uuid4
+from .utility.ai_utils import prepare_cfg, run_ai_model
+
 
 
 # ViewSet for Customer
@@ -228,6 +234,64 @@ class ProjectsViewSet(ModelViewSet):
         elif request.method == 'DELETE':
             image.delete()
             return Response({"message": f"image with id {image_id} is deleted"}, status=status.HTTP_204_NO_CONTENT)
+
+
+    # this is a trigger endpoints while visiting "http://127.0.0.1:8001/store/projects/1/start"()
+    # extract project_id  -->  get image_nr, model_id
+    # in a loop, which loops the projects and in each loop call the prepare_cfg() from ai_utils, which generates a dynamic yaml file
+    # implement a mechnism to check when the processing is done
+    # if the procesing is done, then save the 3 images path and the 3 json files into RestltSet model
+    @action(detail=True, methods=["POST"], url_path='start')
+    def start(self, request, pk=None):
+        # Retrieve the project instance
+        project = self.get_object()
+        project_id = project.id
+        ai_model_id = project.ai_model.id if project.ai_model else None
+
+
+        # example: "/Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/cfg.yaml"
+        ymal_file_path = prepare_cfg(project_id, "8b82b41a-bf0c-4855-95c8-c0c7be8bb20b.jpg", ai_model_id)
+
+        src_path = '/Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/store/ai/src'
+        if src_path not in sys.path:
+            sys.path.append(src_path)
+
+        # Measure the start time
+        start_time = time.time()
+
+        # Now call the function that encapsulates the AI model processing
+        ai_processing_result = run_ai_model(ymal_file_path)
+
+        # Measure the end time
+        end_time = time.time()
+
+        # Calculate the total duration
+        duration = end_time - start_time
+
+        # ... handle the result and return a response ...
+        return Response({
+            "project_id": project_id,
+            "ai_model_id": ai_model_id,
+            "ymal_file_path": ymal_file_path,
+            "ai_processing_result": ai_processing_result,
+            "processing_time_in_seconds": duration
+        }, status=status.HTTP_202_ACCEPTED)
+
+
+
+
+
+
+
+
+
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>ResultSetViewSet>>>>>>>>>>>>>>>>>>
+
+
+
+
+
 
 
 # supports GET-List -> /store/images

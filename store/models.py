@@ -128,11 +128,39 @@ class Image(models.Model):
 class ResultSet(models.Model):
     image = models.OneToOneField(Image, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='resultSets')
+
     result_detection = models.JSONField()
     result_recognition = models.JSONField()
     result_interpretation = models.JSONField()
+
+    text_detection_image_path = models.CharField(max_length=500, blank=True, null=True)
+    text_recognition_image_path = models.CharField(max_length=500, blank=True, null=True)
+    text_interpretation_image_path = models.CharField(max_length=500, blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # for returning the full path of 3 result images of a single image of project
+    # Method for detection image URL
+    def get_full_detection_image_url(self):
+        if self.text_detection_image_path:
+            return f"{settings.LOCALHOST_PORT_URL}{settings.MEDIA_URL}{self.text_detection_image_path}"
+        return None
+
+    # Method for recognition image URL
+    def get_full_recognition_image_url(self):
+        if self.text_recognition_image_path:
+            return f"{settings.LOCALHOST_PORT_URL}{settings.MEDIA_URL}{self.text_recognition_image_path}"
+        return None
+
+    # Method for interpretation image URL
+    def get_full_interpretation_image_url(self):
+        if self.text_interpretation_image_path:
+            return f"{settings.LOCALHOST_PORT_URL}{settings.MEDIA_URL}{self.text_interpretation_image_path}"
+        return None
+
+
+
 
     def __str__(self) -> str:
         return f"result_set id: {self.id}"
