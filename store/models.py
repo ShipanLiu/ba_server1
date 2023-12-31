@@ -49,6 +49,12 @@ class AiModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def get_default_ai_model_id(self):
+        # Gibt den Standardwert für die ai_model_id zurück
+        # Beispiel: Rückgabe der ID des ersten Eintrags in der AiModel-Tabelle
+        default_ai_model = AiModel.objects.first()
+        return default_ai_model.id if default_ai_model else None
+
     def __str__(self) -> str:
         return f"ai-mode id: {self.id}, name: {self.name}"
 
@@ -69,6 +75,7 @@ class Project(models.Model):
 
     name = models.CharField(max_length=200)
     description = models.TextField(max_length=500, blank=True, null=True)
+    # here don't define the default value, because you never know the ai_model_id especially after deleting/adding a ai_model
     ai_model = models.ForeignKey(AiModel, on_delete=models.SET_NULL, null=True, related_name='projects')
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='PENDING')  # Example: pending, processing, completed, failed
     # if you delete a custiomer. and this customer has projects related, then you can not delete
@@ -142,6 +149,7 @@ class Image(models.Model):
 class ResultSet(models.Model):
     image = models.OneToOneField(Image, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='resultSets')
+    ai_model = models.ForeignKey(AiModel, on_delete=models.SET_NULL, null=True, related_name='resultSets')
 
     result_detection = models.JSONField()
     result_recognition = models.JSONField()

@@ -65,14 +65,24 @@ class CreateProjectsModelSerilizer(serializers.ModelSerializer):
         model = Project
         fields = ["id", "name", "description", "ai_model_id"]
 
-    ai_model_id = serializers.IntegerField()
+    ai_model_id = serializers.PrimaryKeyRelatedField(
+        queryset=AiModel.objects.all(),
+        default=AiModel.get_default_ai_model_id
+        # Angenommen, Sie haben eine Methode in AiModel definiert, die den Standardwert liefert
+    )
 
+    def validate_ai_model_id(self, value):
+        if value is None:
+            raise serializers.ValidationError("There is no ai_model in database")
+        return value
+
+    # get the "customer_id" from context passed from ViewSet to create a new project
     def create(self, validated_data):
         # get the customer_id
         customer_id = self.context.get("customer_id")
+        ai_model = validated_data.pop('ai_model_id', None)
         # create the project
-        project = Project.objects.create(customer_id=customer_id, **validated_data)
-        # to return the full project info, create a sLizer
+        project = Project.objects.create(customer_id=customer_id, ai_model=ai_model, **validated_data)
         return project
 
 
@@ -80,7 +90,9 @@ class CreateProjectsModelSerilizer(serializers.ModelSerializer):
 class UpdateProjectsModelSerilizer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ['name', 'description']
+        fields = ['name', 'description', 'ai_model_id']
+
+    ai_model_id = serializers.IntegerField()
 
 
 

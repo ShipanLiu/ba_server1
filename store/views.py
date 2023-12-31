@@ -1,12 +1,14 @@
 from uuid import uuid4
 import time
-import sys
+import sys, os, shutil
 from celery import group
+
 
 #django
 from django.shortcuts import render, get_object_or_404
 from django.db.models.aggregates import Count
 from django_filters.rest_framework import DjangoFilterBackend
+from django.conf import settings
 
 
 # rest_framework
@@ -247,7 +249,18 @@ class ProjectsViewSet(ModelViewSet):
     def start(self, request, pk=None):
         project = self.get_object()
         project_id = project.id
-        ai_model_id = project.ai_model.id if project.ai_model else None
+        ai_model_id = project.ai_model.id
+        ai_model_name = project.ai_model.name
+
+        # the related output path
+        output_path = os.path.join(settings.MEDIA_ROOT, 'outputs', f'project_{project_id}')
+
+        # for timeing reasons(retriggering will take more time), delete the old output
+        if os.path.exists(output_path):
+            shutil.rmtree(output_path)
+
+        # start time counting
+        start_time = time.time()
 
         # Create a group of image processing tasks
         task_group = group(process_image.s(project_id, image.id, ai_model_id) for image in project.images.all())
@@ -255,16 +268,37 @@ class ProjectsViewSet(ModelViewSet):
         # Execute the group of tasks and wait for all results synchronously
         result_group = task_group.apply()
 
-        # Check for errors in results
-        if any(result.failed() for result in result_group.results):
-            return Response({
-                "message": "Error occurred during processing.",
-                "details": [result.info for result in result_group.results if result.failed()]
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        successful_results = []
+        failed_results = []
+        # Process each result
+        for result in result_group.results:
+            result_data = result.get()
+            if result_data["success"]:
+                successful_results.append(result_data)
+            else:
+                failed_results.append(result_data)
 
-        return Response({
-            "message": f"All {project.images.count()} images in project {project.id} have been processed successfully."
-        }, status=status.HTTP_200_OK)
+        # end time counting
+        end_time = time.time()
+        total_processing_time = end_time - start_time
+
+
+        # Construct the response data
+        response_data = {
+            "project_id": project_id,
+            "ai_model_id": ai_model_id,
+            "ai_model_name": ai_model_name,
+            "error": len(failed_results) > 0,
+            "error_msg": "" if not failed_results else "Errors occurred during processing. Details please see failed key",
+            "successful_results": successful_results,
+            "failed_results": failed_results,
+            "total_processing_time": total_processing_time  # Gesamtverarbeitungszeit hinzufügen
+        }
+
+        # Determine the status code based on whether any errors occurred
+        status_code = status.HTTP_200_OK if not failed_results else status.HTTP_500_INTERNAL_SERVER_ERROR
+
+        return Response(response_data, status=status_code)
 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>ResultSetViewSet>>>>>>>>>>>>>>>>>>
