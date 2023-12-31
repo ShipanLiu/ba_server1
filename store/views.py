@@ -2,6 +2,7 @@ from uuid import uuid4
 import time
 import sys, os, shutil
 from celery import group
+from django.db import transaction
 
 
 #django
@@ -51,7 +52,8 @@ class CustomerViewSet(BaseCustomerViewSet):
     def get_queryset(self):
         return Customer.objects.all()
     # serilizer
-    serializer_class = CustomerModelSerializer
+    def get_serializer_class(self):
+        return CustomerModelSerializer
 
     #define permissions: as a admin, I can modify and check all the Customers
     permission_classes = [IsAdminUser]
@@ -81,8 +83,10 @@ class CustomerViewSet(BaseCustomerViewSet):
             # validate data
             dSlizer.is_valid(raise_exception=True)
             # save
-            dSlizer.save()
-            return Response(dSlizer.data)
+            customer = dSlizer.save()
+            # return the full customer object
+            response_serializer = CustomerModelSerializer(customer)
+            return Response(response_serializer.data)
 
 
 
@@ -259,6 +263,10 @@ class ProjectsViewSet(ModelViewSet):
         if os.path.exists(output_path):
             shutil.rmtree(output_path)
 
+        # set the project status
+        project.status = Project.STATUS_CHOICES[1][0]  # 'PROCESSING'
+        project.save()
+
         # start time counting
         start_time = time.time()
 
@@ -270,6 +278,7 @@ class ProjectsViewSet(ModelViewSet):
 
         successful_results = []
         failed_results = []
+
         # Process each result
         for result in result_group.results:
             result_data = result.get()
@@ -282,10 +291,17 @@ class ProjectsViewSet(ModelViewSet):
         end_time = time.time()
         total_processing_time = end_time - start_time
 
+        # Projektstatus aktualisieren
+        if failed_results:
+            project.status = Project.STATUS_CHOICES[3][0]  # 'FAILED'
+        else:
+            project.status = Project.STATUS_CHOICES[2][0]  # 'COMPLETED'
+        project.save()
 
         # Construct the response data
         response_data = {
             "project_id": project_id,
+            "status": project.status,
             "ai_model_id": ai_model_id,
             "ai_model_name": ai_model_name,
             "error": len(failed_results) > 0,
