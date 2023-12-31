@@ -87,11 +87,13 @@ class Project(models.Model):
         # If there's an associated image file, delete it from the filesystem
         project_folder_name = f"project_{self.id}"
         project_image_path = os.path.join(settings.MEDIA_ROOT, project_folder_name)
+        project_output_path = os.path.join(settings.MEDIA_ROOT, 'outputs', f'project_{self.id}')
 
         # delete project folder of path project_image_path
         # Check if the folder exists and delete it
-        if os.path.exists(project_image_path) and os.path.isdir(project_image_path):
-            shutil.rmtree(project_image_path)
+        for path in [project_image_path, project_output_path]:
+            if os.path.exists(path) and os.path.isdir(path):
+                shutil.rmtree(path)
 
         # Call the "real" delete() method to delete the object from the database
         super().delete(*args, **kwargs)
