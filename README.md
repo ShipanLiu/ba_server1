@@ -54,7 +54,7 @@ Follow these steps to set up the project:
     ```bash
    python manage.py runserver
    
-7. **Create Superuser** Create a superuser to access the Django admin panel:
+7. **Create Superuser** Create a superuser to access the Django admin panel under /admin:
     ```bash
    # create superuser/admin
     python manage.py createsuperuser
@@ -62,33 +62,33 @@ Follow these steps to set up the project:
 ## 📘 User Behavior Guide
 
 ### Step 1: User Creation and Authentication 🙋‍♂️
-1. Register: Visit http://127.0.0.1:8001/auth/users/ to create a user.
-2. Login: Visit http://127.0.0.1:8001/auth/jwt/create to log in and obtain an access-token. Include this token in all subsequent requests.
-3. Profile: Visit http://127.0.0.1:8001/store/customers/me/ to view and update your information (birth_date and phone) using the PATCH method.
-4. AI Models: Visit http://127.0.0.1:8001/store/ais/ to browse available AI models.
-5. Projects: Visit http://127.0.0.1:8001/store/projects/ to view and create projects, like creating one with `project_id = 19`.
+1. Register: Visit `/auth/users/` to create a user.
+2. Login: Visit `/auth/jwt/create` to log in and obtain an access-token. Include this token in all subsequent requests.
+3. Profile: Visit `/store/customers/me/` to view and update your information (birth_date and phone) using the PATCH method.
+4. AI Models: Visit `/store/ais/` to browse available AI models.
+5. Projects: Visit `/store/projects/` to view and create projects, like creating one with `project_id = 19`.
 6. **Next Step:** Move on to Step 2.
 
 ### Step 2: Uploading Images to a Project 🖼️
-1. After creating projects, visit http://127.0.0.1:8001/store/projects/ to see your projects. Example data is in [`all_projects.json`](/steps_example_project_19/step2_project_create_view_upload_images/all_projects.json) at `/steps_example_project_19/step2_project_create_view_upload_images`.
-2. Image Upload: For project 19, upload images at http://127.0.0.1:8001/store/projects/19/images.
-3. View Project: Then, visit http://127.0.0.1:8001/store/projects/19/ for details of project 19. Find [`project_19.json`](/steps_example_project_19/step2_project_create_view_upload_images/project_19.json) in the same folder.
+1. After creating projects, visit `/store/projects/` to see your projects. Example data is in [`all_projects.json`](/steps_example_project_19/step2_project_create_view_upload_images/all_projects.json) at `/steps_example_project_19/step2_project_create_view_upload_images`.
+2. Image Upload: For project 19, upload images at `/store/projects/19/images`.
+3. View Project: Then, visit `/store/projects/19/` for details of project 19. Find [`project_19.json`](/steps_example_project_19/step2_project_create_view_upload_images/project_19.json) in the same folder.
 4. **Next Step:** Head to Step 3.
 
 ### Step 3: Triggering AI Processing ⚙️
-1. Trigger: With images in project 19, start processing by POSTing to http://127.0.0.1:8001/store/projects/19/start/.
+1. Trigger: With images in project 19, start processing by POSTing to `/store/projects/19/start/`.
 2. Processing Time: It takes around 40 seconds, approximately 20 seconds per image.
 3. Results: Check [`trigger_response.json`](/steps_example_project_19/step3_trigger/trigger_response.json) in `/steps_example_project_19/step3_trigger/`.
 4. **Next Step:** Proceed to Step 4.
 
 ### Step 4: Accessing the Result Set 📈
-1. Result List: Access all results for project 19 at http://127.0.0.1:8001/store/projects/19/results/.
-2. Specific Results: For results of image ID 55, visit http://127.0.0.1:8001/store/projects/19/results/55.
+1. Result List: Access all results for project 19 at `/store/projects/19/results/`.
+2. Specific Results: For results of image id 55, visit `/store/projects/19/results/55`.
 3. Download: [`project_19_resultset.json`](/steps_example_project_19/step4_get_result_set/project_19_resultset.json) is available in the `/steps_example_project_19/step4_get_result_set/` directory.
 4. **Next Step:** Continue to Step 5.
 
 ### Step 5: Updating AI Model and Recreating Results 🔄
-1. Update AI Model: Change the AI model of project 19 by PATCHing to http://127.0.0.1:8001/store/projects/19/ with a new `ai_model_id`.
+1. Update AI Model: Change the AI model of project 19 by PATCHing to `/store/projects/19/` with a new `ai_model_id`.
 2. Redo Steps: Repeat Steps 3 and 4 to process the images with the new AI model and retrieve the updated results.
 
 
