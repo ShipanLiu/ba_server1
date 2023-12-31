@@ -84,7 +84,7 @@ Follow these steps to set up the project:
 ### Step 4: Accessing the Result Set 📈
 1. Result List: Access all results for project 19 at http://127.0.0.1:8001/store/projects/19/results/.
 2. Specific Results: For results of image ID 55, visit http://127.0.0.1:8001/store/projects/19/results/55.
-3. Download: [`project_19_results.json`](/steps_example_project_19/step4_get_result_set/project_19_results.json) is available in the `/steps_example_project_19/step4_get_result_set/` directory.
+3. Download: [`project_19_resultset.json`](/steps_example_project_19/step4_get_result_set/project_19_resultset.json) is available in the `/steps_example_project_19/step4_get_result_set/` directory.
 4. **Next Step:** Continue to Step 5.
 
 ### Step 5: Updating AI Model and Recreating Results 🔄
