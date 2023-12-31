@@ -131,6 +131,22 @@ class Image(models.Model):
             if os.path.isfile(image_path):
                 os.remove(image_path)
 
+            # Delete corresponding output directory
+            image_base_name = os.path.splitext(self.name)[0]
+            output_dir_path = os.path.join(settings.MEDIA_ROOT, 'outputs', f'project_{self.project_id}', image_base_name)
+            print(output_dir_path)
+            if os.path.exists(output_dir_path) and os.path.isdir(output_dir_path):
+                shutil.rmtree(output_dir_path)
+            else:
+                print(f"in models.py for model Image deleting image with image_id: {self.id}, image_name: {self.name} failed!!!")
+
+        # Delete corresponding ResultSet entry
+        try:
+            result_set = ResultSet.objects.get(image=self)
+            result_set.delete()
+        except ResultSet.DoesNotExist:
+            pass  # If ResultSet does not exist, no action needed
+
         # Call the "real" delete() method to delete the object from the database
         super().delete(*args, **kwargs)
 

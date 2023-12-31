@@ -80,7 +80,7 @@ def process_image(project_id, image_id, ai_model_id):
             result_data["error_msg"] = f"The singe processing succeeds for image with name: {image_name}, in project with project id: {project_id}, but not all 3 json files are produced"
             result_data["success"] = False
     else:
-        result_data["error_msg"] = f"The singe processing failed for image with name: {image_name}, in project with project id: {project_id}"
+        result_data["error_msg"] = f"The singe processing failed for image with name: {image_name}, in project with project id: {project_id}, this image can not be processed, please delete this image of this project and upload a new one and try again"
         result_data["success"] = False
 
     return result_data

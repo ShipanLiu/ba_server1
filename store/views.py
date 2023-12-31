@@ -253,6 +253,7 @@ class ProjectsViewSet(ModelViewSet):
     def start(self, request, pk=None):
         project = self.get_object()
         project_id = project.id
+        project_name = project.name
         ai_model_id = project.ai_model.id
         ai_model_name = project.ai_model.name
 
@@ -314,6 +315,7 @@ class ProjectsViewSet(ModelViewSet):
         # Determine the status code based on whether any errors occurred
         status_code = status.HTTP_200_OK if not failed_results else status.HTTP_500_INTERNAL_SERVER_ERROR
 
+        print(f"the processing time for project with project_id:{project_id}, project_name:{project_name}: {total_processing_time}")
         return Response(response_data, status=status_code)
 
 
