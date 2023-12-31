@@ -25,14 +25,14 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
                                    RetrieveModelMixin,
                                    DestroyModelMixin, UpdateModelMixin)
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet
 
 # inside
 from .models import Customer, AiModel, Project, Image, ResultSet
 from .serilizers import (CustomerModelSerializer, PatchCustomerModelSerilizer,
                          AisModelSerilizer, ProjectsModelSerilizer,
                          CreateProjectsModelSerilizer, UpdateProjectsModelSerilizer,
-                         ImageModelSerializer)
+                         ImageModelSerializer, ResultSetModelSerializer)
 from .permissions import IsAdminOrReadOnly
 from .utility.ai_utils import prepare_cfg, run_ai_model
 from .tasks import process_image
@@ -325,20 +325,29 @@ class ProjectsViewSet(ModelViewSet):
 
 
 
-# supports GET-List -> /store/images
-# supports POST-List -> /store/images
-# supports GET-Detail -> assocated with project
-# supports DELETE-Detail -> assocated with project
-# grand all permissions for al while developing
-class ImagesViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
-    pass
+class ResultSetViewSet(ReadOnlyModelViewSet):
+    serializer_class = ResultSetModelSerializer
 
+    def get_queryset(self):
+        """
+        Diese Ansicht sollte die Liste der ResultSet-Einträge für das spezifizierte Projekt zurückgeben.
+        """
+        # Extrahieren Sie die project_id aus der URL.
+        project_id = self.kwargs.get('project_pk')
+        return ResultSet.objects.filter(project_id=project_id)
 
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Erhalten Sie einen spezifischen ResultSet-Eintrag basierend auf der Image-ID.
+        """
+        project_id = self.kwargs.get('project_pk')
+        image_id = kwargs.get('pk')
 
-# supports GET-List -> /store/project/project_pk/results
-# grand all permissions for al while developing
-class ResultsViewSet(ModelViewSet):
-    pass
+        # Hier wird angenommen, dass der 'pk' in der URL die Image-ID und nicht die ResultSet-ID ist.
+        queryset = ResultSet.objects.filter(project_id=project_id, image_id=image_id)
+        result_set = get_object_or_404(queryset)
+        serializer = self.get_serializer(result_set)
+        return Response(serializer.data)
 
 
 

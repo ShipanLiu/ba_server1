@@ -1,0 +1,15 @@
+Let's say you have created some projects, 
+Visit "http://127.0.0.1:8001/store/projects/" to get your project list, the [all_projects.json] could be found inside of this folder
+
+You want to upload some images to project 19 so Next: 
+
+Visit "http://127.0.0.1:8001/store/projects/19/images" to upload some images 
+
+
+After that
+
+
+Visit "http://127.0.0.1:8001/store/projects/19/" you can get the project with id = 9
+the [project_19.json] could be found inside of this folder
+
+Go to step3

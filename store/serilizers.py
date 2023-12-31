@@ -104,10 +104,40 @@ class CustomerModelSerializer(serializers.ModelSerializer):
         model = Customer
         fields = ["id", "phone", "birth_date", "user_id", "user"]
 
-    user_id = serializers.IntegerField
+    user_id = serializers.IntegerField()
     user = DetailUserSerializer(read_only=True)
 
 class PatchCustomerModelSerilizer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ["phone", "birth_date"]
+
+
+# for ResultSet
+class ResultSetModelSerializer(serializers.ModelSerializer):
+    text_detection_image_url = serializers.SerializerMethodField()
+    text_recognition_image_url = serializers.SerializerMethodField()
+    text_interpretation_image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ResultSet
+        fields = [
+            'id', 'project_id', 'image_id', 'ai_model_id',
+            'text_detection_image_url', 'text_recognition_image_url', 'text_interpretation_image_url',
+            'result_detection', 'result_recognition', 'result_interpretation',
+            'created_at', 'updated_at'
+        ]
+
+    project_id = serializers.IntegerField(read_only=True)
+    image_id = serializers.IntegerField(read_only=True)
+    ai_model_id = serializers.IntegerField(read_only=True)
+
+    def get_text_detection_image_url(self, obj):
+        return obj.get_full_detection_image_url()
+
+    def get_text_recognition_image_url(self, obj):
+        return obj.get_full_recognition_image_url()
+
+    def get_text_interpretation_image_url(self, obj):
+        return obj.get_full_interpretation_image_url()
+

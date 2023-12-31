@@ -1,0 +1,83 @@
+[
+    {
+        "id": 16,
+        "name": "project4",
+        "description": "this is project 4",
+        "ai_model_id": 2,
+        "customer_id": 6,
+        "customer_username": "jier",
+        "status": "COMPLETED",
+        "images_nr": 2,
+        "images": [
+            {
+                "id": 53,
+                "project_id": 16,
+                "name": "455dc66a-0fbe-460a-b530-5f4df26900e4.png",
+                "old_name": "image1",
+                "type": "png",
+                "image_url": "http://127.0.0.1:8001/media/project_16/455dc66a-0fbe-460a-b530-5f4df26900e4.png",
+                "created_at": "2023-12-31T11:12:48.713824Z",
+                "updated_at": "2023-12-31T11:12:48.713871Z"
+            },
+            {
+                "id": 54,
+                "project_id": 16,
+                "name": "c97ae69c-ae2e-4a3d-9dc4-1fe94c914093.jpg",
+                "old_name": "image2",
+                "type": "jpg",
+                "image_url": "http://127.0.0.1:8001/media/project_16/c97ae69c-ae2e-4a3d-9dc4-1fe94c914093.jpg",
+                "created_at": "2023-12-31T11:12:48.744955Z",
+                "updated_at": "2023-12-31T11:12:48.744997Z"
+            }
+        ],
+        "created_at": "2023-12-31T08:37:27.969248Z",
+        "updated_at": "2023-12-31T11:14:11.560656Z"
+    },
+    {
+        "id": 19,
+        "name": "p5",
+        "description": "p6",
+        "ai_model_id": 1,
+        "customer_id": 6,
+        "customer_username": "jier",
+        "status": "COMPLETED",
+        "images_nr": 2,
+        "images": [
+            {
+                "id": 55,
+                "project_id": 19,
+                "name": "106312b4-db3d-462f-8165-97391c206114.png",
+                "old_name": "image1",
+                "type": "png",
+                "image_url": "http://127.0.0.1:8001/media/project_19/106312b4-db3d-462f-8165-97391c206114.png",
+                "created_at": "2023-12-31T11:52:56.428296Z",
+                "updated_at": "2023-12-31T11:52:56.428355Z"
+            },
+            {
+                "id": 56,
+                "project_id": 19,
+                "name": "1dad96f2-7c79-45af-b3d6-bbb83f1c879c.jpg",
+                "old_name": "image2",
+                "type": "jpg",
+                "image_url": "http://127.0.0.1:8001/media/project_19/1dad96f2-7c79-45af-b3d6-bbb83f1c879c.jpg",
+                "created_at": "2023-12-31T11:52:56.449859Z",
+                "updated_at": "2023-12-31T11:52:56.449879Z"
+            }
+        ],
+        "created_at": "2023-12-31T09:12:01.721038Z",
+        "updated_at": "2023-12-31T11:53:57.042383Z"
+    },
+    {
+        "id": 20,
+        "name": "test",
+        "description": "test",
+        "ai_model_id": 2,
+        "customer_id": 6,
+        "customer_username": "jier",
+        "status": "PENDING",
+        "images_nr": 0,
+        "images": [],
+        "created_at": "2023-12-31T10:46:33.212732Z",
+        "updated_at": "2023-12-31T10:46:33.212801Z"
+    }
+]

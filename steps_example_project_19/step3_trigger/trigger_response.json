@@ -1,0 +1,32 @@
+{
+    "project_id": 19,
+    "status": "COMPLETED",
+    "ai_model_id": 1,
+    "ai_model_name": "ai_best",
+    "error": false,
+    "error_msg": "",
+    "successful_results": [
+        {
+            "image_id": 55,
+            "image_info": {
+                "name": "106312b4-db3d-462f-8165-97391c206114.png",
+                "old_name": "image1",
+                "image_url": "http://127.0.0.1:8001/media/project_19/106312b4-db3d-462f-8165-97391c206114.png"
+            },
+            "success": true,
+            "error_msg": ""
+        },
+        {
+            "image_id": 56,
+            "image_info": {
+                "name": "1dad96f2-7c79-45af-b3d6-bbb83f1c879c.jpg",
+                "old_name": "image2",
+                "image_url": "http://127.0.0.1:8001/media/project_19/1dad96f2-7c79-45af-b3d6-bbb83f1c879c.jpg"
+            },
+            "success": true,
+            "error_msg": ""
+        }
+    ],
+    "failed_results": [],
+    "total_processing_time": 39.59903407096863
+}
