@@ -15,7 +15,7 @@ class AisModelSerilizer(serializers.ModelSerializer):
 class ImageModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
-        fields = ["id", "project_id", "name", "old_name", "type", "image_url", "created_at", "updated_at"]
+        fields = ["id", "project_id", "name", "old_name", "type", "image_url", "has_result", "created_at", "updated_at"]
 
     project_id = serializers.IntegerField()
     image_url = serializers.SerializerMethodField()

@@ -95,6 +95,13 @@ class Project(models.Model):
             if os.path.exists(path) and os.path.isdir(path):
                 shutil.rmtree(path)
 
+        # Delete corresponding ResultSet entry
+        try:
+            result_set = ResultSet.objects.filter(project=self)
+            result_set.delete()
+        except ResultSet.DoesNotExist:
+            pass  # If ResultSet does not exist, no action needed
+
         # Call the "real" delete() method to delete the object from the database
         super().delete(*args, **kwargs)
 
@@ -114,6 +121,7 @@ class Image(models.Model):
     # In the Database: The ImageField or FileField stores the path relative to MEDIA_ROOT, like project_2/p2_1.png.
     # a single image can not be bigger than 5MB
     image_file = models.ImageField(upload_to=project_image_directory_path, validators=[simgle_image_size_vsalidator])
+    has_result = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -198,6 +206,15 @@ class ResultSet(models.Model):
         if self.text_interpretation_image_path:
             return f"{settings.LOCALHOST_PORT_URL}{settings.MEDIA_URL}{self.text_interpretation_image_path}"
         return None
+
+    # nsure that the has_result field of the Image model is updated whenever a ResultSet is saved
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Save the ResultSet first
+
+        # Check if there is a related image and update its has_result field
+        if self.image:
+            self.image.has_result = True
+            self.image.save()  # Save the image with the updated has_result field
 
 
 

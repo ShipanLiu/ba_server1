@@ -150,6 +150,21 @@ class ProjectsViewSet(ModelViewSet):
             "customer_id": customer.id
         }
 
+    # eaching time retriving the project list, if any image "has_result" = False, then set the project status to PENDING
+    def retrieve(self, request, *args, **kwargs):
+        project = self.get_object()
+
+        # Check if any images in the project have not been processed
+        unprocessed_images_exist = project.images.filter(has_result=False).exists()
+
+        # Update the project status to 'PENDING' if there are unprocessed images
+        if unprocessed_images_exist:
+            project.status = Project.STATUS_CHOICES[0][0]  # 'PENDING'
+            project.save()
+
+        serializer = self.get_serializer(project)
+        return Response(serializer.data)
+
     # overwrite the create() for responding a full project structure
     def create(self, request, *args, **kwargs):
         # Create serializer with incoming data
@@ -230,6 +245,7 @@ class ProjectsViewSet(ModelViewSet):
                 return Response({"data": serializer.data, "error": False, "error_msg": "", "bad_images": bad_images}, status=status.HTTP_201_CREATED)
             return Response({"data": "", "error": True, "error_msg": "no images have extensions 'png' or 'jpg', please upload ALL again", "bad_images": bad_images}, status=status.HTTP_400_BAD_REQUEST)
 
+    # modifying images are not allowed
     @action(detail=True, methods=['GET', 'DELETE'], url_path='images/(?P<image_id>\d+)')
     def image_detail(self, request, pk=None, image_id=None):
         project = self.get_object()
@@ -317,6 +333,104 @@ class ProjectsViewSet(ModelViewSet):
 
         print(f"the processing time for project with project_id:{project_id}, project_name:{project_name}: {total_processing_time}")
         return Response(response_data, status=status_code)
+
+    # Processing a single image by calling: http://127.0.0.1:8001/store/projects/4/start_rest
+    @action(detail=True, methods=["POST"], url_path='start_rest')
+    def start_rest(self, request, pk=None):
+        project = self.get_object()  # Get the project instance
+        project_id = project.id
+        project_name = project.name
+        ai_model_id = project.ai_model.id
+        ai_model_name = project.ai_model.name
+
+        # Filter images that have not been processed yet
+        unprocessed_images = project.images.filter(has_result=False)
+
+        # If there are no unprocessed images, return a response
+        if not unprocessed_images:
+            response_data = {
+                "project_id": project_id,
+                "project_status": project.status,
+                "ai_model_id": ai_model_id,
+                "ai_model_name": ai_model_name,
+                "error": False,
+                "error_msg": "",
+                "successful_results": [],
+                "failed_results": [],
+                "total_processing_time": 0
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        # set the project status
+        project.status = Project.STATUS_CHOICES[1][0]  # 'PROCESSING'
+        project.save()
+
+        # Start time counting
+        start_time = time.time()
+
+        # Trigger processing for unprocessed images
+        task_group = group(
+            process_image.s(project_id, image.id, ai_model_id)
+            for image in unprocessed_images
+        )
+
+        # Execute the group of tasks and wait for all results synchronously
+        # here you can not use apply_async(), becuause: Celery benötigt
+        # einen laufenden Message Broker wie RabbitMQ oder Redis, um Aufgaben zu verwalten und zu verteilen
+        result_group = task_group.apply()
+
+        # Collect the results when they're ready
+        successful_results = []
+        failed_results = []
+
+        for result in result_group.get():
+            if result["success"]:
+                successful_results.append(result)
+            else:
+                failed_results.append(result)
+
+        # End time counting
+        end_time = time.time()
+        total_processing_time = end_time - start_time
+
+        # Update project status based on processing result
+        if failed_results:
+            project.status = Project.STATUS_CHOICES[3][0]  # 'FAILED'
+        else:
+            project.status = Project.STATUS_CHOICES[2][0]  # 'COMPLETED'
+        project.save()
+
+        # Construct the response data
+        response_data = {
+            "project_id": project_id,
+            "project_status": project.status,
+            "ai_model_id": ai_model_id,
+            "ai_model_name": ai_model_name,
+            "error": len(failed_results) > 0,
+            "error_msg": "Some images failed to process." if failed_results else "",
+            "successful_results": successful_results,
+            "failed_results": failed_results,
+            "total_processing_time": total_processing_time
+        }
+
+        # Determine the status code based on whether any errors occurred
+        status_code = status.HTTP_200_OK if not failed_results else status.HTTP_500_INTERNAL_SERVER_ERROR
+
+        print(
+            f"Processing completed for unprocessed images in project ID: {project_id}. Total processing time: {total_processing_time} seconds")
+
+        return Response(response_data, status=status_code)
+
+
+
+
+
+
+
+
+
+
+
 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>ResultSetViewSet>>>>>>>>>>>>>>>>>>
