@@ -1,0 +1,15 @@
+Visit "http://127.0.0.1:8001/auth/users/" to create a user
+
+Visit "http://127.0.0.1:8001//auth/jwt/create" to login and get the access-token
+
+From now on, all requests sent to the server should contain the access-token
+
+Visit: "http://127.0.0.1:8001/store/customers/me/" to get your own information and update your birth_date and phone using PATCH method
+
+Visit: "http://127.0.0.1:8001/store/ais/" to get the ai_list
+
+Next
+
+Visit: "http://127.0.0.1:8001/store/projects/" to get the project list, here you can create a project, let's say you create some projects and one of them is with project_id = 19
+
+Go to Step2

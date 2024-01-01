@@ -1,0 +1,7 @@
+After getting positive response from triggering, you now have access to the result set
+
+Visit: "http://127.0.0.1:8001/store/projects/19/results/" to get result set of all images
+
+Visit: "http://127.0.0.1:8001/store/projects/19/results/55" to get result set of image with id = 55
+
+[project_19_results.json] see inside of this folder 

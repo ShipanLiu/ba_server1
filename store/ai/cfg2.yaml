@@ -1,0 +1,33 @@
+input:
+  image: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d.png
+  model: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/store/ai/model_weights/weights/best.pt
+paths:
+  general:
+    output_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d
+  text_detection:
+    cache_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_detection/cache
+    cache_processed_labels_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_detection/cache/processed/labels
+    cache_processed_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_detection/cache/processed
+    cache_tiled_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_detection/cache/tiled
+    final_original_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_detection/final/original
+    final_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_detection/final
+    final_visual_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_detection/final/visual
+    output_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_detection
+  text_interpretation:
+    cache_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_interpretation/cache
+    cache_processed_labels_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_interpretation/cache/processed/labels
+    cache_processed_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_interpretation/cache/processed
+    cache_tiled_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_interpretation/cache/tiled
+    final_original_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_interpretation/final/original
+    final_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_interpretation/final
+    final_visual_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_interpretation/final/visual
+    output_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_interpretation
+  text_recognition:
+    cache_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_recognition/cache
+    cache_processed_labels_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_recognition/cache/processed/labels
+    cache_processed_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_recognition/cache/processed
+    cache_tiled_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_recognition/cache/tiled
+    final_original_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_recognition/final/original
+    final_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_recognition/final
+    final_visual_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_recognition/final/visual
+    output_path: /Volumes/D/Z_Frond_Back_workplace/10_BA/ba_server/media/outputs/project_1/1eb61467-c116-4ef3-b416-71e6c6fdf26d/text_recognition

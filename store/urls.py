@@ -13,13 +13,12 @@ router.register("customers", views.CustomerViewSet, basename="customers")
 router.register("ais", views.AIsViewSet, basename="ais")
 # "projects/"
 router.register("projects", views.ProjectsViewSet, basename="projects")
-# "images"
-router.register("images", views.ImagesViewSet, basename="images")
+# "images" functionality is defined under project as actions, here the nedted router for images is not used
 
 # for rested router: /projects/project_id/results/
 projects_router = routers.NestedDefaultRouter(router, "projects", lookup="project") # lookup "project" ---changes--->  project_pk
-# projects_router.register("upload-images", views.ResultsViewSet, basename="upload-images") #the drf will create for us 2 route based on the basename: "result-sets-datail", "result-sets-list"
-projects_router.register("results", views.ResultsViewSet, basename="result-sets")
+# projects_router.register("upload-images", views.ResultSetViewSet, basename="upload-images") #the drf will create for us 2 route based on the basename: "result-sets-datail", "result-sets-list"
+projects_router.register("results", views.ResultSetViewSet, basename="result-sets")
 
 
 

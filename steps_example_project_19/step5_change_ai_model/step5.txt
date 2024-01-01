@@ -1,0 +1,7 @@
+Now you maybe not want to change the ai_model of a project and recreate the result set
+
+Do PATCH request to: "http://127.0.0.1:8001/store/projects/19/" and update the ai_model_id
+
+Next
+
+Repeat step 3 and step4

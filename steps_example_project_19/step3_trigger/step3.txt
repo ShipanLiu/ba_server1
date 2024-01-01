@@ -1,0 +1,11 @@
+Now in project 19 exist 2 images:
+
+Now start triggering
+
+Do POST request to : "http://127.0.0.1:8001/store/projects/19/start/" with empty request body
+
+It will take about 40s, each image for about 20s
+
+The [trigger_response.json] can be found inside of the folder
+
+Go to step4

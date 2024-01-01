@@ -2,9 +2,12 @@
 **/model_weights/
 **/output/
 output/
+outputs/
 model_weights/
 store/ai/model_weights/
 store/images
+media/
+media/outputs/
 **/migrations/
 *.pt
 
