@@ -76,10 +76,11 @@ class Project(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(max_length=500, blank=True, null=True)
     # here don't define the default value, because you never know the ai_model_id especially after deleting/adding a ai_model
-    ai_model = models.ForeignKey(AiModel, on_delete=models.SET_NULL, null=True, related_name='projects')
+    #  if the referenced AiModel is to be deleted, if any projects use this ai model, then this ai model can not be deleted
+    ai_model = models.ForeignKey(AiModel, on_delete=models.PROTECT, null=True, related_name='projects')
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='PENDING')  # Example: pending, processing, completed, failed
     # if you delete a custiomer. and this customer has projects related, then you can not delete
-    customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name="projects")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -120,6 +121,10 @@ class Image(models.Model):
     type = models.CharField(max_length=20, blank=True, null=True)
     # In the Database: The ImageField or FileField stores the path relative to MEDIA_ROOT, like project_2/p2_1.png.
     # a single image can not be bigger than 5MB
+    # image_files has 2 subfield:
+    # image_file.name = project_7/c99016bc-5344-44cd-9480-5759c09693cb.jpg
+    # image_file.url = /media/project_7/c99016bc-5344-44cd-9480-5759c09693cb.jpg, almost same as the following defined method image_url()
+
     image_file = models.ImageField(upload_to=project_image_directory_path, validators=[simgle_image_size_vsalidator])
     has_result = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

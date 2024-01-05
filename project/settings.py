@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'django_filters',
+    'corsheaders',
 
 
 
@@ -55,6 +56,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -139,10 +141,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# German Time
+TIME_ZONE = 'Europe/Berlin'
 
 USE_I18N = True
 
+# Enable Time Zone Support
 USE_TZ = True
 
 
@@ -190,3 +194,20 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
     "ACCESS_TOKEN_LIFETIME": timedelta(days=300),
 }
+
+# CORS settings of package "django-cors-headers"
+
+# A list of origins that are authorized to make cross-site HTTP requests
+CORS_ALLOWED_ORIGINS = [
+#     "https://example.com",
+#     "https://sub.example.com",
+#     "http://localhost:8080",
+#     "http://127.0.0.1:8080",
+    "http://127.0.0.1",
+]
+
+# A list of strings representing regexes that match Origins that are authorized to make cross-site HTTP requests.
+# CORS_ALLOWED_ORIGIN_REGEXES = []
+
+#
+# CORS_ALLOW_ALL_ORIGINS = True
