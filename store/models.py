@@ -14,7 +14,7 @@ from .validators import simgle_image_size_vsalidator
 # Create your models here.
 # here define the profile
 class Customer(models.Model):
-    phone = models.CharField(max_length=255)
+    phone = models.CharField(max_length=255, null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     # if a user is deleted, then the customer should also be deleted
     # but if this customer has projects, then this customer can not be deleted.

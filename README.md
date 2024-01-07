@@ -61,35 +61,77 @@ Follow these steps to set up the project:
 
 ## 📘 User Behavior Guide
 
-### Step 1: User Creation and Authentication 🙋‍♂️
-1. Register: Visit `/auth/users/` to create a user.
-2. Login: Visit `/auth/jwt/create` to log in and obtain an access-token. Include this token in all subsequent requests.
-3. Profile: Visit `/store/customers/me/` to view and update your information (birth_date and phone) using the PATCH method.
-4. AI Models: Visit `/store/ais/` to browse available AI models.
-5. Projects: Visit `/store/projects/` to view and create projects, like creating one with `project_id = 19`.
-6. **Next Step:** Move on to Step 2.
+### Step 1: User Creation and Authentication 🙋️
+#### 1. Register: Visit `/auth/users/` to create a user.
+![Alt text](screenshots/apis/customers/01_user_create.png)
+#### 2. Login: Visit `/auth/jwt/create` to log in and obtain an access-token. Include this token in all subsequent requests.
+##### Get access-token
+![Alt text](screenshots/apis/customers/gifs/01_get_access_token.gif)
+##### Set up access-token
+![Alt text](screenshots/apis/customers/03_1_set_access_token.png)
+#### 3. Refresh: Visit `/auth/jwt/refresh` to get a new access-token if the current access-token is expired.
+![Alt text](screenshots/apis/customers/gifs/03_refresh_token.gif)
+#### 4. Profile: Visit `/store/customers/me/` to view and update your information (birth_date and phone) using the PATCH method.
+##### View customer information
+![Alt text](screenshots/apis/customers/03_2_get_me_info.png)
+##### Update customer information
+![Alt text](screenshots/apis/customers/gifs/02_change_me.gif)
+#### 5. AI Models: Visit `/store/ais/` to browse available AI models.
+![Alt text](screenshots/apis/ais/01_get_ais.png)
 
-### Step 2: Uploading Images to a Project 🖼️
-1. After creating projects, visit `/store/projects/` to see your projects. Example data is in [`all_projects.json`](/steps_example_project_19/step2_project_create_view_upload_images/all_projects.json) at `/steps_example_project_19/step2_project_create_view_upload_images`.
-2. Image Upload: For project 19, upload images at `/store/projects/19/images`.
-3. View Project: Then, visit `/store/projects/19/` for details of project 19. Find [`project_19.json`](/steps_example_project_19/step2_project_create_view_upload_images/project_19.json) in the same folder.
-4. **Next Step:** Head to Step 3.
+### Step 2: Project 🖼️
+#### 1. Create projects: Visit `/store/projects/` to create projects.
+![Alt text](screenshots/apis/projects/01_create_projects.png)
+#### 2. After creating projects, visit `/store/projects/` again to see your projects update . Example data is in [`all_projects.json`](/steps_example_project_19/step2_project_create_view_upload_images/all_projects.json) at `/steps_example_project_19/step2_project_create_view_upload_images`.
+![Alt text](screenshots/apis/projects/02_view_projects.png)
+#### 3. You can view a singe project:
+![Alt text](screenshots/apis/projects/03_single_view.png)
+#### 4. You can modify details of a single project:
+![Alt text](screenshots/apis/projects/04_modify_single.png)
+#### 5. You can delete a single project:
+##### Succeed
+![Alt text](screenshots/apis/projects/05_delate_success.png)
+##### Failed
+![Alt text](screenshots/apis/projects/06_delete_failed.png)
 
-### Step 3: Triggering AI Processing ⚙️
-1. Trigger: With images in project 19, start processing by POSTing to `/store/projects/19/start/`.
-2. Processing Time: It takes around 40 seconds, approximately 20 seconds per image.
-3. Results: Check [`trigger_response.json`](/steps_example_project_19/step3_trigger/trigger_response.json) in `/steps_example_project_19/step3_trigger/`.
-4. **Next Step:** Proceed to Step 4.
 
-### Step 4: Accessing the Result Set 📈
-1. Result List: Access all results for project 19 at `/store/projects/19/results/`.
-2. Specific Results: For results of image id 55, visit `/store/projects/19/results/55`.
-3. Download: [`project_19_resultset.json`](/steps_example_project_19/step4_get_result_set/project_19_resultset.json) is available in the `/steps_example_project_19/step4_get_result_set/` directory.
-4. **Next Step:** Continue to Step 5.
 
-### Step 5: Updating AI Model and Recreating Results 🔄
-1. Update AI Model: Change the AI model of project 19 by PATCHing to `/store/projects/19/` with a new `ai_model_id`.
-2. Redo Steps: Repeat Steps 3 and 4 to process the images with the new AI model and retrieve the updated results.
+### Step 3: Image 🏙️
+#### 1. Uploading images to a project
+![Alt text](screenshots/apis/images/01_upload_images.png)
+#### 2. Retrieving image list of a project
+![Alt text](screenshots/apis/images/02_get_image_list.png)
+#### 3. Getting a specific image of a project
+![Alt text](screenshots/apis/images/03_get_single_image.png)
+#### 4. Deleting a specific image of a project
+![Alt text](screenshots/apis/images/04_delete_a_image.png)
+
+
+
+### Step 4: Triggering AI Processing ⚙️
+#### 1. Triggerring: With images uploaded to project 22, start processing
+##### This is a long request, response will be returned after finishing processing
+![Alt text](screenshots/apis/triggering/01_1_triggering_start.png)
+##### The response results
+![Alt text](screenshots/apis/triggering/01_2_triggering_finished.png)
+#### 2. Uploading a new image(image5) 
+![Alt text](screenshots/apis/triggering/02_new_image.png)
+#### 3. Start processing the unprocessed images(here image5)in this project
+![Alt text](screenshots/apis/triggering/03_start_rest.png)
+#### 4. Check this updated project again
+![Alt text](screenshots/apis/triggering/04_updated_project.png)
+#### 5. Example Results: Check [`trigger_response.json`](/steps_example_project_19/step3_trigger/trigger_response.json)
+
+
+### Step 5: Accessing the Result Set 📈
+#### 1. Result List
+#### 2. Result of a specific image of the project 
+#### 3. Example Results Set: [`project_19_resultset.json`](/steps_example_project_19/step4_get_result_set/project_19_resultset.json)
+
+
+### Step 6: Updating AI Model and Recreating Results 🔄
+#### 1. Update AI Model: Change the AI model of project 19 by PATCHing to `/store/projects/19/` with a new `ai_model_id`.
+#### 2. Redo Steps: Repeat Steps 3 and 4 to process the images with the new AI model and retrieve the updated results.
 
 
 ## 🛠️ Used Frameworks/Packages
