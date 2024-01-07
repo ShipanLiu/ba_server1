@@ -82,7 +82,7 @@ Follow these steps to set up the project:
 ### Step 2: Project 🖼️
 #### 1. Create projects: Visit `/store/projects/` to create projects.
 ![Alt text](screenshots/apis/projects/01_create_projects.png)
-#### 2. After creating projects, visit `/store/projects/` again to see your projects update . Example data is in [`all_projects.json`](/steps_example_project_19/step2_project_create_view_upload_images/all_projects.json) at `/steps_example_project_19/step2_project_create_view_upload_images`.
+#### 2. After creating projects, visit `/store/projects/` again to see your projects update . Example data is in [`all_projects.json`](/steps_example_project_19/step2_project_create_view_upload_images/all_projects.json).
 ![Alt text](screenshots/apis/projects/02_view_projects.png)
 #### 3. You can view a singe project:
 ![Alt text](screenshots/apis/projects/03_single_view.png)
@@ -125,13 +125,11 @@ Follow these steps to set up the project:
 
 ### Step 5: Accessing the Result Set 📈
 #### 1. Result List
+![Alt text](screenshots/apis/resultsets/01_resultset_list.png)
 #### 2. Result of a specific image of the project 
+![Alt text](screenshots/apis/resultsets/02_resultset_single.png)
 #### 3. Example Results Set: [`project_19_resultset.json`](/steps_example_project_19/step4_get_result_set/project_19_resultset.json)
 
-
-### Step 6: Updating AI Model and Recreating Results 🔄
-#### 1. Update AI Model: Change the AI model of project 19 by PATCHing to `/store/projects/19/` with a new `ai_model_id`.
-#### 2. Redo Steps: Repeat Steps 3 and 4 to process the images with the new AI model and retrieve the updated results.
 
 
 ## 🛠️ Used Frameworks/Packages
