@@ -106,6 +106,19 @@ class Project(models.Model):
         # Call the "real" delete() method to delete the object from the database
         super().delete(*args, **kwargs)
 
+    def update_status_based_on_images(self):
+        unprocessed_images_exist = Image.objects.filter(project=self, has_result=False).exists()
+        if unprocessed_images_exist and self.status == 'PROCESSING':  # Use named constants or direct string if STATUS_CHOICES is not an enum
+            return
+
+        if self.status == 'FAILED':  # Use named constants or direct string if STATUS_CHOICES is not an enum
+            return
+        elif unprocessed_images_exist:
+            self.status = 'PENDING'  # 'PENDING'
+        else:
+            self.status = 'COMPLETED'  # 'COMPLETED'
+        self.save()
+
 
     def __str__(self) -> str:
         return f"project id: {self.id}, name: {self.name}"
