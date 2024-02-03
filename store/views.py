@@ -20,6 +20,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.exceptions import PermissionDenied
 
 # for customize the Viewset(replacing the ModelViewSet)
 from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
@@ -334,21 +335,34 @@ class ProjectsViewSet(ModelViewSet):
 
 class ResultSetViewSet(ReadOnlyModelViewSet):
     serializer_class = ResultSetModelSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """
-        Diese Ansicht sollte die Liste der ResultSet-Einträge für das spezifizierte Projekt zurückgeben.
-        """
-        # Extrahieren Sie die project_id aus der URL.
-        project_id = self.kwargs.get('project_pk')
-        return ResultSet.objects.filter(project_id=project_id)
 
+        project_id = self.kwargs.get('project_pk')
+        user = self.request.user
+
+        if user.is_staff:  # or user.is_superuser if you want to restrict to superusers
+            return ResultSet.objects.filter(project_id=project_id)
+
+        # Check if the project belongs to the user
+        if not Project.objects.filter(id=project_id, customer__user=user).exists():
+            raise PermissionDenied("You do not have permission to access this project's results.")
+
+        # Filter by the user's customer-related projects
+        return ResultSet.objects.filter(project_id=project_id, project__customer__user=user)
+
+    # DIY the retrieve response(means retrieve only one item), response according to the image id
     def retrieve(self, request, *args, **kwargs):
         """
         Erhalten Sie einen spezifischen ResultSet-Eintrag basierend auf der Image-ID.
         """
         project_id = self.kwargs.get('project_pk')
         image_id = kwargs.get('pk')
+
+        # Ensure the user has access to the project
+        if not request.user.is_staff and not Project.objects.filter(id=project_id, customer__user=request.user).exists():
+            raise PermissionDenied("You do not have permission to access this project's results.")
 
         # Hier wird angenommen, dass der 'pk' in der URL die Image-ID und nicht die ResultSet-ID ist.
         queryset = ResultSet.objects.filter(project_id=project_id, image_id=image_id)

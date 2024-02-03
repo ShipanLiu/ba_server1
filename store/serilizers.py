@@ -68,7 +68,6 @@ class CreateProjectsModelSerilizer(serializers.ModelSerializer):
     ai_model_id = serializers.PrimaryKeyRelatedField(
         queryset=AiModel.objects.all(),
         default=AiModel.get_default_ai_model_id
-        # Angenommen, Sie haben eine Methode in AiModel definiert, die den Standardwert liefert
     )
 
     def validate_ai_model_id(self, value):
