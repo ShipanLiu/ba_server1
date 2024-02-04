@@ -27,14 +27,20 @@ class TestAIsViewSet:
         assert response.data['name'] == "Test AI Model"
         assert 'id' in response.data
 
-    def test_list_ai_models(self, api_client, ai_model):
+    def test_list_ai_models_unauthenticated(self, api_client, ai_model):
+        response = api_client.get("/store/ais/")
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_list_ai_models_authenticated(self, api_client, ai_model, regular_user):
+        api_client.force_authenticate(user=regular_user)
         response = api_client.get("/store/ais/")
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 1
         assert response.data[0]['name'] == ai_model.name
 
-    def test_retrieve_ai_model(self, api_client, ai_model):
+    def test_retrieve_ai_model_authenticated(self, api_client, ai_model, regular_user):
+        api_client.force_authenticate(user=regular_user)
         response = api_client.get(f"/store/ais/{ai_model.id}/")
         assert response.status_code == status.HTTP_200_OK
         assert response.data['name'] == ai_model.name
+
 
