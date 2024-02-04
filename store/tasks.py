@@ -6,7 +6,7 @@ for the celery tasks
 # tasks.py
 from celery import shared_task
 from .utility.ai_utils import prepare_cfg, run_ai_model
-from .models import Image, ResultSet
+from .models import Image, ResultSet, Project
 from django.conf import settings
 import os
 import json
@@ -18,6 +18,7 @@ import json
 def process_image(project_id, image_id, ai_model_id):
     # Retrieve the image instance
     image = Image.objects.get(id=image_id)
+    project = Project.objects.get(id=project_id)
     image_name = image.name  # the image_name here is with extensions
     image_old_name = image.old_name
     image_file_path = image.image_url()
@@ -80,7 +81,20 @@ def process_image(project_id, image_id, ai_model_id):
             result_data["error_msg"] = f"The singe processing succeeds for image with name: {image_name}, in project with project id: {project_id}, but not all 3 json files are produced"
             result_data["success"] = False
     else:
+        # set the status of project to Failed
+        project.status = Project.STATUS_CHOICES[3][0]  # 'FAILED'
+        project.save()
         result_data["error_msg"] = f"The singe processing failed for image with name: {image_name}, in project with project id: {project_id}, this image can not be processed, please delete this image of this project and upload a new one and try again"
         result_data["success"] = False
 
     return result_data
+
+
+
+
+# currently not in use
+@shared_task
+def update_project_status(project_id):
+    project = Project.objects.get(id=project_id)
+    # update the project status
+    project.update_status_based_on_images()

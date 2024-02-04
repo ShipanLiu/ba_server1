@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_MET
 class IsAdminOrReadOnly(BasePermission):
     #overwrite the method
     def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
+        if request.method in SAFE_METHODS and request.user:
+            return request.user and request.user.is_authenticated
         # this means if "request.user" is set, then check "request.user.is_staff(means it can logi in the admin pannel)", -----> means it is admin
         return bool(request.user and request.user.is_staff)

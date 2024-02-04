@@ -212,3 +212,14 @@ CORS_ALLOWED_ORIGINS = [
 
 #
 # CORS_ALLOW_ALL_ORIGINS = True
+
+
+"""
+celery settings:
+we specify for: when running Redis inside of a docker container
+'/1' means: is the name of database, it could be '/2', '/3'...
+add the configuration for the Celery broker URL, configures the message broker that Celery will use for sending and receiving messages
+redis://: This is the scheme of the URL, and it indicates the protocol to be used. Here, 
+redis specifies that the Redis protocol should be used for communication with the message broker.
+"""
+CELERY_BROKER_URL = "redis://localhost:6379/1"

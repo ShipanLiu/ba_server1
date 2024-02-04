@@ -1,7 +1,7 @@
 from uuid import uuid4
 import time
 import sys, os, shutil
-from celery import group
+from celery import group, chord
 from django.db import transaction
 
 
@@ -20,6 +20,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.exceptions import PermissionDenied
 
 # for customize the Viewset(replacing the ModelViewSet)
 from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
@@ -35,7 +36,7 @@ from .serilizers import (CustomerModelSerializer, PatchCustomerModelSerilizer,
                          ImageModelSerializer, ResultSetModelSerializer)
 from .permissions import IsAdminOrReadOnly
 from .utility.ai_utils import prepare_cfg, run_ai_model
-from .tasks import process_image
+from .tasks import process_image, update_project_status
 
 
 
@@ -155,13 +156,7 @@ class ProjectsViewSet(ModelViewSet):
         project = self.get_object()
 
         # Check if any images in the project have not been processed
-        unprocessed_images_exist = project.images.filter(has_result=False).exists()
-
-        # Update the project status to 'PENDING' if there are unprocessed images
-        if unprocessed_images_exist:
-            project.status = Project.STATUS_CHOICES[0][0]  # 'PENDING'
-            project.save()
-
+        project.update_status_based_on_images()
         serializer = self.get_serializer(project)
         return Response(serializer.data)
 
@@ -284,55 +279,12 @@ class ProjectsViewSet(ModelViewSet):
         project.status = Project.STATUS_CHOICES[1][0]  # 'PROCESSING'
         project.save()
 
-        # start time counting
-        start_time = time.time()
+        task_ids = []
+        for image in project.images.all():
+            task = process_image.delay(project_id, image.id, ai_model_id)
+            task_ids.append(task.id)
 
-        # Create a group of image processing tasks
-        task_group = group(process_image.s(project_id, image.id, ai_model_id) for image in project.images.all())
-
-        # Execute the group of tasks and wait for all results synchronously
-        result_group = task_group.apply()
-
-        successful_results = []
-        failed_results = []
-
-        # Process each result
-        for result in result_group.results:
-            result_data = result.get()
-            if result_data["success"]:
-                successful_results.append(result_data)
-            else:
-                failed_results.append(result_data)
-
-        # end time counting
-        end_time = time.time()
-        total_processing_time = end_time - start_time
-
-        # Projektstatus aktualisieren
-        if failed_results:
-            project.status = Project.STATUS_CHOICES[3][0]  # 'FAILED'
-        else:
-            project.status = Project.STATUS_CHOICES[2][0]  # 'COMPLETED'
-        project.save()
-
-        # Construct the response data
-        response_data = {
-            "project_id": project_id,
-            "status": project.status,
-            "ai_model_id": ai_model_id,
-            "ai_model_name": ai_model_name,
-            "error": len(failed_results) > 0,
-            "error_msg": "" if not failed_results else "Errors occurred during processing. Details please see failed key",
-            "successful_results": successful_results,
-            "failed_results": failed_results,
-            "total_processing_time": total_processing_time  # Gesamtverarbeitungszeit hinzufügen
-        }
-
-        # Determine the status code based on whether any errors occurred
-        status_code = status.HTTP_200_OK if not failed_results else status.HTTP_500_INTERNAL_SERVER_ERROR
-
-        print(f"the processing time for project with project_id:{project_id}, project_name:{project_name}: {total_processing_time}")
-        return Response(response_data, status=status_code)
+        return Response({"message": "GOT IT, START PROCESSING"}, status=status.HTTP_202_ACCEPTED)
 
     # Processing a single image by calling: http://127.0.0.1:8001/store/projects/4/start_rest
     @action(detail=True, methods=["POST"], url_path='start_rest')
@@ -348,78 +300,18 @@ class ProjectsViewSet(ModelViewSet):
 
         # If there are no unprocessed images, return a response
         if not unprocessed_images:
-            response_data = {
-                "project_id": project_id,
-                "project_status": project.status,
-                "ai_model_id": ai_model_id,
-                "ai_model_name": ai_model_name,
-                "error": False,
-                "error_msg": "",
-                "successful_results": [],
-                "failed_results": [],
-                "total_processing_time": 0
-            }
-            return Response(response_data, status=status.HTTP_200_OK)
+            return Response({"message": "NO REST IMAGES TO PROCESS"}, status=status.HTTP_202_ACCEPTED)
 
         # set the project status
         project.status = Project.STATUS_CHOICES[1][0]  # 'PROCESSING'
         project.save()
 
-        # Start time counting
-        start_time = time.time()
+        task_ids = []
+        for image in unprocessed_images:
+            task = process_image.delay(project_id, image.id, ai_model_id)
+            task_ids.append(task.id)
 
-        # Trigger processing for unprocessed images
-        task_group = group(
-            process_image.s(project_id, image.id, ai_model_id)
-            for image in unprocessed_images
-        )
-
-        # Execute the group of tasks and wait for all results synchronously
-        # here you can not use apply_async(), becuause: Celery benötigt
-        # einen laufenden Message Broker wie RabbitMQ oder Redis, um Aufgaben zu verwalten und zu verteilen
-        result_group = task_group.apply()
-
-        # Collect the results when they're ready
-        successful_results = []
-        failed_results = []
-
-        for result in result_group.get():
-            if result["success"]:
-                successful_results.append(result)
-            else:
-                failed_results.append(result)
-
-        # End time counting
-        end_time = time.time()
-        total_processing_time = end_time - start_time
-
-        # Update project status based on processing result
-        if failed_results:
-            project.status = Project.STATUS_CHOICES[3][0]  # 'FAILED'
-        else:
-            project.status = Project.STATUS_CHOICES[2][0]  # 'COMPLETED'
-        project.save()
-
-        # Construct the response data
-        response_data = {
-            "project_id": project_id,
-            "project_status": project.status,
-            "ai_model_id": ai_model_id,
-            "ai_model_name": ai_model_name,
-            "error": len(failed_results) > 0,
-            "error_msg": "Some images failed to process." if failed_results else "",
-            "successful_results": successful_results,
-            "failed_results": failed_results,
-            "total_processing_time": total_processing_time
-        }
-
-        # Determine the status code based on whether any errors occurred
-        status_code = status.HTTP_200_OK if not failed_results else status.HTTP_500_INTERNAL_SERVER_ERROR
-
-        print(
-            f"Processing completed for unprocessed images in project ID: {project_id}. Total processing time: {total_processing_time} seconds")
-
-        return Response(response_data, status=status_code)
+        return Response({"message": "GOT IT, START PROCESSING"}, status=status.HTTP_202_ACCEPTED)
 
 
 
@@ -443,21 +335,34 @@ class ProjectsViewSet(ModelViewSet):
 
 class ResultSetViewSet(ReadOnlyModelViewSet):
     serializer_class = ResultSetModelSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """
-        Diese Ansicht sollte die Liste der ResultSet-Einträge für das spezifizierte Projekt zurückgeben.
-        """
-        # Extrahieren Sie die project_id aus der URL.
-        project_id = self.kwargs.get('project_pk')
-        return ResultSet.objects.filter(project_id=project_id)
 
+        project_id = self.kwargs.get('project_pk')
+        user = self.request.user
+
+        if user.is_staff:  # or user.is_superuser if you want to restrict to superusers
+            return ResultSet.objects.filter(project_id=project_id)
+
+        # Check if the project belongs to the user
+        if not Project.objects.filter(id=project_id, customer__user=user).exists():
+            raise PermissionDenied("You do not have permission to access this project's results.")
+
+        # Filter by the user's customer-related projects
+        return ResultSet.objects.filter(project_id=project_id, project__customer__user=user)
+
+    # DIY the retrieve response(means retrieve only one item), response according to the image id
     def retrieve(self, request, *args, **kwargs):
         """
         Erhalten Sie einen spezifischen ResultSet-Eintrag basierend auf der Image-ID.
         """
         project_id = self.kwargs.get('project_pk')
         image_id = kwargs.get('pk')
+
+        # Ensure the user has access to the project
+        if not request.user.is_staff and not Project.objects.filter(id=project_id, customer__user=request.user).exists():
+            raise PermissionDenied("You do not have permission to access this project's results.")
 
         # Hier wird angenommen, dass der 'pk' in der URL die Image-ID und nicht die ResultSet-ID ist.
         queryset = ResultSet.objects.filter(project_id=project_id, image_id=image_id)
