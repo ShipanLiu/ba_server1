@@ -13,10 +13,7 @@ cleaner.clean_dirs()
 # Load input image
 localizer = Localizer(cfg)
 localizer.inference([cfg["input"]["image"]])
-
 recognizer = Recognizer(cfg)
-
 recognizer.inference(cfg["paths"]["text_detection"]["final_path"])
-
 interpreter = Interpreter(cfg)
 interpreter.inference(cfg["paths"]["text_recognition"]["final_path"])
