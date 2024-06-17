@@ -48,6 +48,21 @@ Follow these steps to set up the project:
    python manage.py makemigrations
    python manage.py migrate
 
+   after migration, you need to insert to the ai model table with 2 records:
+   [
+    {
+        "id": 1,
+        "name": "ai_best",
+        "description": "best"
+    },
+    {
+        "id": 2,
+        "name": "ai_epoch_299",
+        "description": "epoch_299"
+    }
+   ]
+
+
 5. **Download ai weight file** Download the AI model weights from this https://drive.google.com/file/d/1bSP7DinU-4ZfdZFVOZf6zPM8tG7KMvGQ/view?usp=sharing. Unzip model_weights.zip and place its contents in the /store/ai directory.
 
 6. **Start Project** Run the Django development server:
